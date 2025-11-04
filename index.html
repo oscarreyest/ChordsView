@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChordPro Viewer — Full Tag Support</title>
+<title>ChordPro Viewer — Full Tag + PDF</title>
 <style>
   :root{--bg:#f6f8fb;--card:#fff;--muted:#6b7280;--accent:#1f6feb}
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:18px;background:var(--bg);color:#111}
@@ -33,8 +33,8 @@
 <body>
   <div class="container">
     <header>
-      <h1>ChordPro Viewer — Full Tag Support</h1>
-      <p class="meta">Paste your ChordPro text below. This viewer supports metadata tags and structural block tags (chorus, bridge, tab, comments, etc.) and allows transposing.</p>
+      <h1>ChordPro Viewer — Full Tag + PDF</h1>
+      <p class="meta">Paste your ChordPro text below. Supports metadata tags, structural blocks, transpose, and export to PDF/Print.</p>
     </header>
 
     <div style="margin-bottom:12px">
@@ -51,315 +51,90 @@
       </div>
     </div>
 
-    <div id="outputArea" class="viewer">
-      <!-- metadata + rendered song will go here -->
-    </div>
+    <div id="outputArea" class="viewer"></div>
 
     <footer>
-      Host on GitHub Pages and embed via iframe into Google Sites. This viewer transposes roots and bass notes, displays ChordPro tags and block sections.
+      Host on GitHub Pages or embed via iframe into Google Sites.
     </footer>
   </div>
 
 <script>
-/* Full ChordPro-capable renderer (practical subset)
-   - Metadata tags (title, artist, subtitle, album, composer, key, capo, tempo, time, comment)
-   - Block tags: {start_of_chorus} / {end_of_chorus}, {soc}/{eoc}, {start_of_bridge}/{end_of_bridge}, {start_of_tab}/{end_of_tab}
-   - Inline {comment: ...} and {comment_box: ...} and generic tags stored/displayed
-   - Chord transpose and chord/bass handling
-   - Keeps chords above lyrics with monospace pre layout
-*/
-
 const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const flatToSharp = { 'Db':'C#', 'Eb':'D#', 'Gb':'F#', 'Ab':'G#', 'Bb':'A#' };
 let transposeSteps = 0;
 
-// safe escape for HTML
-function esc(s){
-  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// transpose single chord token like "C#m7/G#"
 function transposeChordToken(token, steps){
-  // separate main and slash bass
   const parts = token.split('/');
-  const main = parts[0];
-  const bass = parts[1];
-
+  const main = parts[0], bass = parts[1];
   const transSingle = (ch) => {
-    // match root and remainder
-    const m = ch.match(/^([A-G])([#b])?(.*)$/);
-    if(!m) return ch;
+    const m = ch.match(/^([A-G])([#b])?(.*)$/); if(!m) return ch;
     let [, root, acc, rest] = m;
-    let full = root + (acc||'');
-    if(flatToSharp[full]) full = flatToSharp[full];
-    let idx = NOTES.indexOf(full);
-    if(idx === -1) return ch;
-    let ni = (idx + steps) % 12;
-    if(ni < 0) ni += 12;
-    return NOTES[ni] + (rest || '');
+    let full = root + (acc||''); if(flatToSharp[full]) full=flatToSharp[full];
+    let idx = NOTES.indexOf(full); if(idx==-1) return ch;
+    let ni = (idx+steps)%12; if(ni<0) ni+=12; return NOTES[ni]+(rest||'');
   };
-
-  const newMain = transSingle(main);
-  if(bass) return newMain + '/' + transSingle(bass);
-  return newMain;
+  return bass ? transSingle(main)+'/'+transSingle(bass) : transSingle(main);
 }
 
-// transpose all chords in the raw text (before processing)
 function applyTransposeToText(text, steps){
-  // match content inside [ ... ]
   return text.replace(/\[([^\]]+)\]/g, (_, chordText) => {
-    // chordText can be multiple chord tokens separated by spaces
-    const tokens = chordText.split(/\s+/).map(t => t.trim()).filter(Boolean);
-    const trans = tokens.map(t => transposeChordToken(t, steps)).join(' ');
-    return '[' + trans + ']';
+    const tokens = chordText.split(/\s+/).map(t=>t.trim()).filter(Boolean);
+    const trans = tokens.map(t=>transposeChordToken(t, steps)).join(' ');
+    return '['+trans+']';
   });
 }
 
-// process one line producing chordLine and lyricLine (two-line layout)
 function renderLineTwoRow(line){
-  let chordLine = '';
-  let lyricLine = '';
-  let inChord = false;
-  let chordBuf = '';
-
-  for (let i = 0; i < line.length; i++){
-    const ch = line[i];
-    if(ch === '['){ inChord = true; chordBuf = ''; }
-    else if(ch === ']'){ inChord = false;
-      // pad chordLine to current lyric length
-      const pad = lyricLine.length - chordLine.length;
-      if(pad > 0) chordLine += ' '.repeat(pad);
-      chordLine += chordBuf;
-    } else if(inChord) chordBuf += ch;
-    else lyricLine += ch;
+  let chordLine='', lyricLine='', inChord=false, chordBuf='';
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='['){inChord=true;chordBuf='';}
+    else if(ch===']'){inChord=false;
+      const pad=lyricLine.length-chordLine.length;
+      if(pad>0) chordLine+=' '.repeat(pad);
+      chordLine+=chordBuf;
+    } else if(inChord) chordBuf+=ch;
+    else lyricLine+=ch;
   }
-
-  // ensure lines are trimmed for clean output; keep spaces for alignment
-  if(chordLine.trim()){
-    return `<pre>${esc(chordLine)}\n${esc(lyricLine)}</pre>`;
-  } else if(lyricLine.trim()){
-    return `<pre>${esc(lyricLine)}</pre>`;
-  } else {
-    return `<div style="height:8px"></div>`;
-  }
+  if(chordLine.trim()) return `<pre>${esc(chordLine)}\n${esc(lyricLine)}</pre>`;
+  else if(lyricLine.trim()) return `<pre>${esc(lyricLine)}</pre>`;
+  else return `<div style="height:8px"></div>`;
 }
 
-// main parser: handles metadata, block state, comments, tabs
 function parseChordPro(text){
-  const lines = text.replace(/\r/g,'').split('\n');
-  const meta = {};            // store metadata tags
-  const otherTags = {};       // store unknown single tags
-  let outputParts = [];       // HTML parts
-  let blockState = { type:null }; // null | 'chorus' | 'bridge' | 'tab' | 'comment_box'
-  const blockStack = [];
-
-  // helper to open/close blocks
+  const lines=text.replace(/\r/g,'').split('\n');
+  const meta={}; const otherTags={}; let outputParts=[]; let blockState={type:null}; const blockStack=[];
   function openBlock(type){
-    blockState.type = type;
-    blockStack.push(type);
-    if(type === 'chorus') outputParts.push('<div class="chorus"><div class="section-label">Chorus</div>');
-    else if(type === 'bridge') outputParts.push('<div class="bridge"><div class="section-label">Bridge</div>');
-    else if(type === 'tab') outputParts.push('<div class="tab">');
-    else if(type === 'comment_box') outputParts.push('<div class="comment" style="border:1px solid #eee;padding:8px;background:#fff">');
+    blockState.type=type; blockStack.push(type);
+    if(type==='chorus') outputParts.push('<div class="chorus"><div class="section-label">Chorus</div>');
+    else if(type==='bridge') outputParts.push('<div class="bridge"><div class="section-label">Bridge</div>');
+    else if(type==='tab') outputParts.push('<div class="tab">');
+    else if(type==='comment_box') outputParts.push('<div class="comment" style="border:1px solid #eee;padding:8px;background:#fff">');
   }
-  function closeBlock(type){
-    if(blockStack.length === 0) return;
-    const top = blockStack.pop();
-    // if mismatched we still close top
-    if(top === 'chorus') outputParts.push('</div>');
-    else if(top === 'bridge') outputParts.push('</div>');
-    else if(top === 'tab') outputParts.push('</div>');
-    else if(top === 'comment_box') outputParts.push('</div>');
-    blockState.type = blockStack[blockStack.length-1] || null;
+  function closeBlock(){ const top=blockStack.pop(); if(!top) return;
+    if(top==='chorus'||top==='bridge'||top==='tab'||top==='comment_box') outputParts.push('</div>');
+    blockState.type=blockStack[blockStack.length-1]||null;
   }
 
   for(let rawLine of lines){
-    const line = rawLine.trimEnd();
-
-    // match a tag like {tag: value} or a single token {start_of_chorus}
-    const tagMatchKV = line.match(/^\{([^:}]+):\s*(.*?)\}$/);
-    const tagMatchToken = line.match(/^\{([a-zA-Z0-9_\-]+)\}$/);
+    const line=rawLine.trimEnd();
+    const tagMatchKV=line.match(/^\{([^:}]+):\s*(.*?)\}$/);
+    const tagMatchToken=line.match(/^\{([a-zA-Z0-9_\-]+)\}$/);
 
     if(tagMatchKV){
-      const tag = tagMatchKV[1].toLowerCase();
-      const val = tagMatchKV[2];
-      // common metadata mapped to meta
-      if(['title','subtitle','artist','album','composer','lyricist','capo','key','time','tempo','language','duration','arranger'].includes(tag)){
-        meta[tag] = val;
-      } else if(['comment','comment_italic','comment_box'].includes(tag)){
-        // inline comment — render immediately
-        if(tag === 'comment_italic'){
-          outputParts.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`);
-        } else if(tag === 'comment' || tag === 'comment_box'){
-          outputParts.push(`<div class="comment">${esc(val)}</div>`);
-        }
-      } else {
-        // store unknown but displayable tags
-        otherTags[tag] = val;
-      }
+      const tag=tagMatchKV[1].toLowerCase(), val=tagMatchKV[2];
+      if(['title','subtitle','artist','album','composer','lyricist','capo','key','time','tempo','language','duration','arranger'].includes(tag)) meta[tag]=val;
+      else if(['comment','comment_italic','comment_box'].includes(tag)){
+        if(tag==='comment_italic') outputParts.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`);
+        else outputParts.push(`<div class="comment">${esc(val)}</div>`);
+      } else otherTags[tag]=val;
       continue;
     } else if(tagMatchToken){
-      const token = tagMatchToken[1].toLowerCase();
-      // block start / end detection and synonyms
-      if(token === 'start_of_chorus' || token === 'soc' || token === 'start_chorus'){
-        openBlock('chorus'); continue;
-      }
-      if(token === 'end_of_chorus' || token === 'eoc' || token === 'end_chorus'){
-        closeBlock('chorus'); continue;
-      }
-      if(token === 'start_of_bridge' || token === 'start_bridge'){
-        openBlock('bridge'); continue;
-      }
-      if(token === 'end_of_bridge' || token === 'end_bridge'){
-        closeBlock('bridge'); continue;
-      }
-      if(token === 'start_of_tab' || token === 'start_tab'){
-        openBlock('tab'); continue;
-      }
-      if(token === 'end_of_tab' || token === 'end_tab'){
-        closeBlock('tab'); continue;
-      }
-      if(token === 'start_of_chorus' || token === 'soc') { openBlock('chorus'); continue; }
-      if(token === 'end_of_chorus' || token === 'eoc') { closeBlock('chorus'); continue; }
-      if(token === 'start_of_comment' || token === 'comment_box') { openBlock('comment_box'); continue; }
-      if(token === 'end_of_comment' || token === 'end_comment') { closeBlock('comment_box'); continue; }
-      // other block-level tokens we may want to display as labels
-      if(['verse','chorus','bridge','refrain','solo'].includes(token)){
-        outputParts.push(`<div class="section-label">${esc(token.toUpperCase())}</div>`);
-        continue;
-      }
-      // unknown token — show as small tag for inspection
-      outputParts.push(`<div class="unknown-tag">{${esc(token)}}</div>`);
-      continue;
-    }
-
-    // blank line -> paragraph break
-    if(line.trim() === ''){
-      outputParts.push('<div style="height:10px"></div>');
-      continue;
-    }
-
-    // inside a tab block: show as literal pre (do not parse chords)
-    if(blockState.type === 'tab'){
-      outputParts.push(`<pre>${esc(line)}</pre>`);
-      continue;
-    }
-
-    // normal text line containing chords and lyrics -> render two-line layout
-    const twoRowHtml = renderLineTwoRow(line);
-    outputParts.push(twoRowHtml);
-  }
-
-  // ensure all opened blocks are closed
-  while(blockStack.length) closeBlock();
-
-  // build metadata header html
-  let metaHtml = '<div class="meta">';
-  if(meta.title) metaHtml += `<div class="song-title">${esc(meta.title)}</div>`;
-  if(meta.subtitle) metaHtml += `<div class="song-sub">${esc(meta.subtitle)}</div>`;
-  if(meta.artist || meta.album){
-    metaHtml += '<div class="meta-row">';
-    if(meta.artist) metaHtml += `<div class="song-artist">Artist: ${esc(meta.artist)}</div>`;
-    if(meta.album) metaHtml += `<div class="song-artist">Album: ${esc(meta.album)}</div>`;
-    metaHtml += '</div>';
-  }
-  // show additional common metadata
-  const extras = [];
-  if(meta.key) extras.push('Key: ' + esc(meta.key));
-  if(meta.capo) extras.push('Capo: ' + esc(meta.capo));
-  if(meta.time) extras.push('Time: ' + esc(meta.time));
-  if(meta.tempo) extras.push('Tempo: ' + esc(meta.tempo));
-  if(extras.length) metaHtml += `<div class="meta-row" style="margin-top:6px">${extras.join(' • ')}</div>`;
-
-  // show any other tags in a diagnostics area (only if present)
-  let otherHtml = '';
-  const otherKeys = Object.keys(otherTags);
-  if(otherKeys.length){
-    otherHtml += '<div style="margin-top:8px"><strong>Other tags:</strong> ';
-    otherHtml += otherKeys.map(k => `<span style="margin-right:10px">${esc(k)}: ${esc(otherTags[k])}</span>`).join('');
-    otherHtml += '</div>';
-  }
-
-  return metaHtml + otherHtml + outputParts.join('\n');
-}
-
-// render pipeline
-function render(){
-  const raw = document.getElementById('source').value || '';
-  // first transpose tokens (so displayed chords are transposed)
-  const transApplied = applyTransposeToText(raw, transposeSteps);
-  // then parse and produce HTML
-  const html = parseChordPro(transApplied);
-  document.getElementById('outputArea').innerHTML = html;
-  document.getElementById('transposeVal').textContent = transposeSteps;
-}
-
-// transpose button handlers
-document.getElementById('transposeUp').addEventListener('click', ()=>{ transposeSteps++; render(); });
-document.getElementById('transposeDown').addEventListener('click', ()=>{ transposeSteps--; render(); });
-document.getElementById('render').addEventListener('click', render);
-document.getElementById('loadExample').addEventListener('click', ()=>{
-  document.getElementById('source').value = 
-`{title: Amazing Grace}
-{subtitle: A classic hymn}
-{artist: Traditional}
-{album: Hymns}
-{composer: John Newton}
-{key: C}
-{capo: 0}
-{time: 3/4}
-{tempo: 60}
-
-{comment: Verse 1}
-[C]Amazing [G]grace, how [C]sweet the [F]sound
-That [C]saved a [G]wretch like [C]me
-
-{start_of_chorus}
-{comment: Refrain}
-[C]I [F]once was [C]lost, but [G]now am [C]found
-{end_of_chorus}
-
-{start_of_tab}
-e|------------------|
-B|------------------|
-{end_of_tab}
-
-{comment_box: This viewer shows all tags and structural blocks.}
-`;
-  render();
-});
-
-// load from default on open (empty)
-render();
-
-</script>
-  document.getElementById('exportPdf').addEventListener('click', ()=>{
-  const content = document.getElementById('outputArea').innerHTML;
-  const title = document.querySelector('.song-title')?.textContent || 'ChordPro Song';
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>${title}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin:30px; color:#111; background:#fff; }
-          .meta { margin-bottom:20px; }
-          .song-title { font-size:1.8rem; font-weight:bold; }
-          .song-sub { font-size:1.2rem; color:#555; margin:4px 0 10px; }
-          .meta-row { color:#555; font-size:1rem; margin-bottom:10px; }
-          pre { font-family:monospace; white-space:pre; margin:6px 0; font-size:16px; }
-          .chorus, .bridge, .tab, .comment { border:none; background:#f8f8f8; padding:8px; margin:6px 0; border-radius:4px; }
-          .section-label{font-style:italic;color:#666;margin:4px 0;}
-        </style>
-      </head>
-      <body>
-        ${content}
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-});
-</body>
-</html>
+      const token=tagMatchToken[1].toLowerCase();
+      if(['start_of_chorus','soc','start_chorus'].includes(token)){openBlock('chorus'); continue;}
+      if(['end_of_chorus','eoc','end_chorus'].includes(token)){closeBlock(); continue;}
+      if(['start_of_bridge','start_bridge'].includes(token)){openBlock('bridge'); continue;}
+      if(['end_of_bridge','end_bridge'].includes(token)){closeBlock(); continue;}
+      if(['start_of_tab','start_tab'].includes(token)){openBlock('tab'); continue;}

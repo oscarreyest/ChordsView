@@ -260,7 +260,7 @@ loadExample.addEventListener('click', ()=>{
 autoDetect.addEventListener('click', ()=>{
   // Very naive detection: find first chord token and set transposeSteps to 0 (placeholder)
   const txt = source.value || '';
-  const match = txt.match(/\\[([A-G][#b]?)/i);
+  const match = txt.match(/\[([A-G][#b]?)/i);
   if(match){
     alert('Auto-detect is intentionally simple in this version. Use transpose buttons to change key.');
   }else{

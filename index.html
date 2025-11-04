@@ -134,59 +134,7 @@ function transposeChordToken(chordToken, steps){
   return newMain;
 }
 
-function processChordPro(text, steps){
-  // replace chords in [ ... ] with spans and transposed equivalents
-  // also preserve metadata lines ({title: ...}) as bold
-  const lines = text.replace(/\r/g,'').split('\n');
-  let out = [];
-  for(let line of lines){
-    // metadata
-    if(line.trim().startsWith('{') && line.trim().endsWith('}')){
-      out.push('<div class="line"><strong>' + escapeHtml(line) + '</strong></div>');
-      continue;
-    }
-    // find chords in square brackets and replace
-    // We'll transform each [C] into a span.inline-chord with transposed chord, and remove the bracket from lyrics
-    let rendered = '';
-    let idx = 0;
-    const regex = /\[([^\]]+)\]/g;
-    let last = 0;
-    let match;
-    // For preserving alignment, we'll render chords inline above the lyrics by placing chord spans and lyric text together.
-    // Strategy: For a line, build a sequence where chords are shown slightly raised (CSS transform).
-    let pieces = [];
-    let cursor = 0;
-    while((match = regex.exec(line)) !== null){
-      let chordText = match[1];
-      let start = match.index;
-      let lyricSegment = line.substring(cursor, start);
-      if(lyricSegment.length>0){
-        pieces.push({type:'lyric', text:lyricSegment});
-      }
-      // transpose chordText by steps (handle multiple chords separated by space inside bracket)
-      let transposed = chordText.split(/\s+/).map(t=>transposeChordToken(t, steps)).join(' ');
-      pieces.push({type:'chord', text:transposed});
-      cursor = regex.lastIndex;
-    }
-    // Remainder lyrics
-    if(cursor < line.length){
-      pieces.push({type:'lyric', text: line.substring(cursor)});
-    }
-    // Build HTML for this line: show lyric text but inject chords as inline-chord spans before the following lyric fragment.
-    // Simple approach: when a chord appears, render a span with chord and then continue lyric.
-    let lineHtml = '';
-    for(let p of pieces){
-      if(p.type==='chord'){
-        lineHtml += '<span class="inline-chord chord">['+escapeHtml(p.text)+']</span>';
-      } else {
-        lineHtml += escapeHtml(p.text);
-      }
-    }
-    if(lineHtml.trim()==='') lineHtml='&nbsp;';
-    out.push('<div class="line">'+lineHtml+'</div>');
-  }
-  return out.join('\n');
-}
+https://oscarreyest.github.io/ChordsView/#song=e3RpdGxlOiBBbWF6aW5nIEdyYWNlfVxuW0NdQW1hemluZyBbR11ncmFjZSwgaG93IFtDXXN3ZWV0IHRoZSBbRl1zb3VuZFxuVGhhdCBbQ11zYXZlZCBhIFtHXXdyZXRjaCBsaWtlIFtDXW1l
 
 function escapeHtml(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');

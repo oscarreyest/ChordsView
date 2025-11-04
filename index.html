@@ -18,6 +18,10 @@ pre {
   line-height:1.4em;
   font-size:16px;
 }
+.song-meta { margin-bottom:1em; }
+.song-title { font-size:1.6em; font-weight:bold; }
+.song-artist { font-size:1.2em; color:#555; }
+.song-key, .song-capo { font-size:1em; color:#777; }
 </style>
 </head>
 <body>
@@ -37,6 +41,9 @@ let semitoneShift = 0;
 function loadExample() {
   document.getElementById('input').value =
 `{title: Amazing Grace}
+{artist: Traditional}
+{key: C}
+
 [C]Amazing [G]grace, how [C]sweet the [F]sound
 That [C]saved a [G]wretch like [C]me
 I [C]once was [F]lost, but [C]now am [G]found
@@ -49,7 +56,6 @@ function transposeChord(chord) {
   if (!match) return chord;
   let [, root, accidental, rest] = match;
   let fullNote = root + (accidental || '');
-  // convert flats to sharps
   const flatToSharp = { Db:'C#', Eb:'D#', Gb:'F#', Ab:'G#', Bb:'A#' };
   if (flatToSharp[fullNote]) fullNote = flatToSharp[fullNote];
   let idx = NOTES.indexOf(fullNote);
@@ -66,8 +72,24 @@ function transpose(delta) {
 function processChordPro(text) {
   const lines = text.split('\n');
   let html = '';
+  let title='', artist='', key='', capo='';
+
   for (const line of lines) {
-    if (line.trim().startsWith('{')) continue;
+    if (line.startsWith('{')) {
+      const m = line.match(/^\{(\w+):\s*(.*?)\}$/);
+      if (m) {
+        const tag = m[1].toLowerCase();
+        const val = m[2];
+        if (tag === 'title') title = val;
+        else if (tag === 'artist') artist = val;
+        else if (tag === 'key') key = val;
+        else if (tag === 'capo') capo = val;
+      }
+      continue;
+    }
+
+    if (line.trim() === '') { html += '<br>'; continue; }
+
     let chordLine = '';
     let lyricLine = '';
     let chordBuffer = '';
@@ -75,11 +97,9 @@ function processChordPro(text) {
 
     for (const char of line) {
       if (char === '[') {
-        inChord = true;
-        chordBuffer = '';
+        inChord = true; chordBuffer = '';
       } else if (char === ']') {
         inChord = false;
-        // pad chord line so chords line up
         const spaces = lyricLine.length - chordLine.length;
         if (spaces > 0) chordLine += ' '.repeat(spaces);
         chordLine += chordBuffer;
@@ -90,20 +110,26 @@ function processChordPro(text) {
       }
     }
 
-    if (chordLine.trim()) {
-      html += `<pre>${chordLine}\n${lyricLine}</pre>`;
-    } else if (lyricLine.trim()) {
-      html += `<pre>${lyricLine}</pre>`;
-    } else {
-      html += `<br>`;
-    }
+    if (chordLine.trim()) html += `<pre>${chordLine}\n${lyricLine}</pre>`;
+    else if (lyricLine.trim()) html += `<pre>${lyricLine}</pre>`;
   }
-  return html;
+
+  let metaHTML = '<div class="song-meta">';
+  if (title) metaHTML += `<div class="song-title">${title}</div>`;
+  if (artist) metaHTML += `<div class="song-artist">${artist}</div>`;
+  if (key || capo) {
+    metaHTML += `<div class="song-key">`;
+    if (key) metaHTML += `Key: ${key} `;
+    if (capo) metaHTML += ` Capo: ${capo}`;
+    metaHTML += `</div>`;
+  }
+  metaHTML += '</div>';
+
+  return metaHTML + html;
 }
 
 function render() {
   let txt = document.getElementById('input').value;
-  // transpose all chords
   txt = txt.replace(/\[([A-G][#b]?[^\]]*)\]/g, (_, chord) => `[${transposeChord(chord)}]`);
   document.getElementById('output').innerHTML = processChordPro(txt);
 }

@@ -1,242 +1,107 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>ChordPro Viewer (Static)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChordPro Viewer</title>
 <style>
-  :root{--bg:#f8f9fb;--card:#ffffff;--accent:#2b6cb0;--muted:#586069}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; background:var(--bg); margin:0; padding:20px; color:#111}
-  .container{max-width:900px;margin:0 auto}
-  header h1{margin:0 0 6px;font-size:20px}
-  header p{margin:0 0 12px;color:var(--muted)}
-  .card{background:var(--card);border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(16,24,40,0.04)}
-  textarea{width:100%;min-height:160px;font-family:monospace;font-size:14px;padding:10px;box-sizing:border-box;border-radius:6px;border:1px solid #ddd}
-  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  button, .btn{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
-  button.secondary{background:#e6eef9;color:var(--accent);border:1px solid #cfe0f6}
-  .viewer{white-space:pre-wrap;font-family:inherit;font-size:17px;line-height:1.55}
-  .chord{font-weight:700;color:#0b5394}
-  .meta{color:var(--muted);font-size:13px;margin-bottom:6px}
-  .row{display:flex;gap:8px;align-items:center}
-  input[type=file]{display:inline-block}
-  .transpose-controls{display:flex;gap:6px;align-items:center}
-  .small{font-size:13px;padding:6px 8px}
-  .share{margin-left:auto;display:flex;gap:8px}
-  footer{color:var(--muted);font-size:13px;text-align:center;margin-top:18px}
-  .note{font-size:13px;color:#3b3b3b;margin-top:8px}
-  .copyok{color:green;font-size:13px;margin-left:8px}
-  /* Make chords appear slightly above by using a CSS trick with inline-block and transform */
-  .inline-chord{display:inline-block;vertical-align:baseline;margin-right:2px;transform:translateY(-6px);font-size:13px}
-  .line{display:block}
-  .help{font-size:13px;color:var(--muted);margin-top:8px}
-  @media (max-width:520px){ .inline-chord{transform:translateY(-4px);font-size:12px} }
+body { font-family: Arial, sans-serif; margin: 2em; background:#fafafa; }
+textarea { width:100%; height:200px; font-family:monospace; }
+button { margin:5px; }
+pre {
+  font-family: monospace;
+  white-space: pre;
+  background:#fff;
+  padding:0.6em;
+  border:1px solid #ccc;
+  border-radius:6px;
+  line-height:1.4em;
+  font-size:16px;
+}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>ChordPro Viewer</h1>
-    <p class="meta">Paste or upload a ChordPro (.cho/.crd/.txt) file. Use the transpose buttons to change key live.</p>
-  </header>
-
-  <div class="card">
-    <label for="file">Upload .cho file</label>
-    <div class="row" style="margin-top:6px">
-      <input id="file" type="file" accept=".cho,.crd,.txt"/>
-      <div class="share" style="margin-left:auto">
-        <button id="loadExample" class="small secondary">Load Example</button>
-      </div>
-    </div>
-
-    <div style="margin-top:10px">
-      <label for="source">ChordPro text</label>
-      <textarea id="source" placeholder="{title: My Song}\n[C]Hello [G]world"></textarea>
-      <div class="controls">
-        <div class="transpose-controls">
-          <button id="transposeDown" class="small">Transpose −</button>
-          <span id="transposeVal" style="align-self:center">0</span>
-          <button id="transposeUp" class="small">Transpose +</button>
-          <button id="autoDetect" class="small secondary">Auto-detect</button>
-        </div>
-        <div style="margin-left:auto;display:flex;gap:8px">
-          <button id="render" class="small">Render</button>
-          <button id="copyLink" class="small secondary">Copy share link</button>
-        </div>
-      </div>
-      <div class="help">Tip: You can share a song by clicking <strong>Copy share link</strong>. It encodes the song text into the URL hash (private but long).</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="meta">Rendered song</div>
-    <div id="viewer" class="viewer"></div>
-  </div>
-
-  <footer>
-    Built for embedding in Google Sites — host this index.html somewhere public (GitHub Pages / Netlify), then embed via &lt;iframe&gt;.
-  </footer>
-</div>
+<h2>ChordPro Viewer</h2>
+<textarea id="input" placeholder="Paste your ChordPro text here..."></textarea><br>
+<button onclick="loadExample()">Load Example</button>
+<button onclick="render()">Render</button>
+<button onclick="transpose(-1)">Transpose −</button>
+<button onclick="transpose(1)">Transpose +</button>
+<hr>
+<div id="output"></div>
 
 <script>
-/* Basic chord transpose utilities.
-   - Parses chords inside square brackets [C#m7/G#]
-   - Transposes only the root (before modifiers)
-*/
-const SEMITONES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const ALT = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#','Cb':'B','E#':'F','B#':'C'};
-function normalize(note){
-  if(!note) return note;
-  note = note.replace('♯','#').replace('♭','b');
-  if(ALT[note]) return ALT[note];
-  return note;
-}
-function noteIndex(note){
-  note = normalize(note);
-  // accept like "C", "C#", "Db"
-  for(let i=0;i<SEMITONES.length;i++){
-    if(SEMITONES[i]===note) return i;
+function processChordPro(text) {
+  const lines = text.split('\n');
+  let html = '';
+  for (let line of lines) {
+    if (line.trim().startsWith('{')) continue; // skip directives
+    let chordLine = '';
+    let lyricLine = '';
+    let chordOpen = false;
+    let chord = '';
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '[') {
+        chordOpen = true; chord = '';
+      } else if (char === ']') {
+        chordOpen = false;
+        const spaces = lyricLine.length - chordLine.length;
+        if (spaces > 0) chordLine += ' '.repeat(spaces);
+        chordLine += chord;
+      } else {
+        if (chordOpen) chord += char;
+        else lyricLine += char;
+      }
+    }
+    if (chordLine.trim() === '') html += `<pre>${lyricLine}</pre>`;
+    else html += `<pre>${chordLine}\n${lyricLine}</pre>`;
   }
-  return -1;
+  return html;
 }
-function transposeNote(note, steps){
-  // note could be like C, C#, Db
-  let n = normalize(note);
-  let idx = noteIndex(n);
-  if(idx===-1) return note; // unknown
-  let ni = (idx + steps)%12;
-  if(ni<0) ni+=12;
-  return SEMITONES[ni];
-}
-function transposeChordToken(chordToken, steps){
-  // chordToken example: C#m7/G#
-  // split by slash for bass
-  let parts = chordToken.split('/');
-  let main = parts[0];
-  let bass = parts[1];
 
-  // main: start with root letters A-G with optional # or b
-  let m = main.match(/^([A-Ga-g][#b]?)(.*)$/);
-  if(!m) return chordToken; // not a chord
-  let root = m[1].toUpperCase();
-  let rest = m[2]||'';
-  let troot = transposeNote(root, steps);
-  let newMain = troot + rest;
-  if(bass){
-    let b = bass.match(/^([A-Ga-g][#b]?)(.*)$/);
-    if(b){
-      let broot = b[1].toUpperCase();
-      let brest = b[2]||'';
-      let tb = transposeNote(broot, steps);
-      return newMain + '/' + tb + brest;
+// --- Transpose logic ---
+let semitoneShift = 0;
+const notes = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+function transpose(delta) {
+  semitoneShift += delta;
+  render();
+}
+
+function transposeChord(chord) {
+  const regex = /^([A-G])(#|b)?(.*)$/;
+  const match = chord.match(regex);
+  if (!match) return chord;
+  let [_, root, accidental, rest] = match;
+  let index = notes.indexOf(root + (accidental || ''));
+  if (index < 0) {
+    // handle flats
+    if (accidental === 'b') {
+      const flatToSharp = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'};
+      const key = root + 'b';
+      if (flatToSharp[key]) index = notes.indexOf(flatToSharp[key]);
     }
   }
-  return newMain;
+  if (index < 0) return chord;
+  let newIndex = (index + semitoneShift + 12) % 12;
+  return notes[newIndex] + rest;
 }
 
-https://oscarreyest.github.io/ChordsView/#song=e3RpdGxlOiBBbWF6aW5nIEdyYWNlfVxuW0NdQW1hemluZyBbR11ncmFjZSwgaG93IFtDXXN3ZWV0IHRoZSBbRl1zb3VuZFxuVGhhdCBbQ11zYXZlZCBhIFtHXXdyZXRjaCBsaWtlIFtDXW1l
-
-function escapeHtml(s){
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function render() {
+  let txt = document.getElementById('input').value;
+  txt = txt.replace(/\[([A-G][#b]?[^\]]*)\]/g, (_, chord) => `[${transposeChord(chord)}]`);
+  document.getElementById('output').innerHTML = processChordPro(txt);
 }
 
-// UI wiring
-const source = document.getElementById('source');
-const renderBtn = document.getElementById('render');
-const viewer = document.getElementById('viewer');
-const transposeUp = document.getElementById('transposeUp');
-const transposeDown = document.getElementById('transposeDown');
-const transposeVal = document.getElementById('transposeVal');
-const fileInput = document.getElementById('file');
-const copyLink = document.getElementById('copyLink');
-const loadExample = document.getElementById('loadExample');
-const autoDetect = document.getElementById('autoDetect');
-
-let transposeSteps = 0;
-
-function renderFromSource(){
-  let txt = source.value || '';
-  let html = processChordPro(txt, transposeSteps);
-  viewer.innerHTML = html;
-  transposeVal.textContent = transposeSteps;
-  // update hashless? no need
+function loadExample() {
+  document.getElementById('input').value =
+`{title: Amazing Grace}
+[C]Amazing [G]grace, how [C]sweet the [F]sound
+That [C]saved a [G]wretch like [C]me
+I [C]once was [F]lost, but [C]now am [G]found
+Was [C]blind but [G]now I [C]see`;
 }
-
-renderBtn.addEventListener('click', ()=>{ renderFromSource(); });
-
-transposeUp.addEventListener('click', ()=>{
-  transposeSteps += 1; renderFromSource();
-});
-transposeDown.addEventListener('click', ()=>{
-  transposeSteps -= 1; renderFromSource();
-});
-
-fileInput.addEventListener('change', (evt)=>{
-  const f = evt.target.files[0];
-  if(!f) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    source.value = e.target.result;
-    transposeSteps = 0;
-    renderFromSource();
-    // encode into URL hash as convenience?
-    // we'll not automatically overwrite hash unless user copies link
-  };
-  reader.readAsText(f);
-});
-
-copyLink.addEventListener('click', async ()=>{
-  const txt = source.value || '';
-  const enc = btoa(unescape(encodeURIComponent(txt)));
-  const url = location.origin + location.pathname + '#song=' + enc;
-  try{
-    await navigator.clipboard.writeText(url);
-    copyLink.textContent = 'Link copied!';
-    setTimeout(()=>{ copyLink.textContent = 'Copy share link'; },1500);
-  }catch(e){
-    alert('Unable to copy. Here is the link:\\n' + url);
-  }
-});
-
-loadExample.addEventListener('click', ()=>{
-  const ex = "{title: Amazing Grace}\\n[C]Amazing [G]grace, how [C]sweet the [F]sound\\nThat [C]saved a [G]wretch like [C]me";
-  source.value = decodeURIComponent(ex);
-  transposeSteps = 0;
-  renderFromSource();
-});
-
-autoDetect.addEventListener('click', ()=>{
-  // Very naive detection: find first chord token and set transposeSteps to 0 (placeholder)
-  const txt = source.value || '';
-  const match = txt.match(/\[([A-G][#b]?)/i);
-  if(match){
-    alert('Auto-detect is intentionally simple in this version. Use transpose buttons to change key.');
-  }else{
-    alert('No chord tokens found (like [C] ) in the text.');
-  }
-});
-
-// Load from share link in hash if present
-function loadFromHash(){
-  const h = location.hash.replace(/^#/,'');
-  if(!h) return;
-  const params = new URLSearchParams(h);
-  if(params.has('song')){
-    try{
-      const enc = params.get('song');
-      const txt = decodeURIComponent(escape(atob(enc)));
-      source.value = txt;
-      transposeSteps = 0;
-      renderFromSource();
-    }catch(e){
-      console.warn('Failed to decode song from URL', e);
-    }
-  }
-}
-loadFromHash();
-
-// initial render
-renderFromSource();
 </script>
 </body>
 </html>

@@ -42,6 +42,7 @@
       <div class="controls" style="margin-top:8px">
         <button id="loadExample" class="btn secondary">Load Example</button>
         <button id="render" class="btn">Render</button>
+        <button id="exportPdf" class="btn secondary">Export PDF / Print</button>
         <div style="margin-left:auto;display:flex;gap:8px">
           <button id="transposeDown" class="btn secondary">Transpose −</button>
           <span id="transposeVal" style="align-self:center">0</span>
@@ -332,5 +333,33 @@ B|------------------|
 render();
 
 </script>
+  document.getElementById('exportPdf').addEventListener('click', ()=>{
+  const content = document.getElementById('outputArea').innerHTML;
+  const title = document.querySelector('.song-title')?.textContent || 'ChordPro Song';
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>${title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin:30px; color:#111; background:#fff; }
+          .meta { margin-bottom:20px; }
+          .song-title { font-size:1.8rem; font-weight:bold; }
+          .song-sub { font-size:1.2rem; color:#555; margin:4px 0 10px; }
+          .meta-row { color:#555; font-size:1rem; margin-bottom:10px; }
+          pre { font-family:monospace; white-space:pre; margin:6px 0; font-size:16px; }
+          .chorus, .bridge, .tab, .comment { border:none; background:#f8f8f8; padding:8px; margin:6px 0; border-radius:4px; }
+          .section-label{font-style:italic;color:#666;margin:4px 0;}
+        </style>
+      </head>
+      <body>
+        ${content}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+});
 </body>
 </html>

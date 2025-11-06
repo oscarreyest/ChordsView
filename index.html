@@ -71,18 +71,21 @@
       <label for="source" style="display:block;font-weight:600;margin-bottom:8px">ChordPro source</label>
       <textarea id="source" placeholder="{title: Song}\n{artist: Someone}\n[C]Hello [G]world"></textarea>
 
-     <div class="controls no-print" style="margin-top:10px">
-  <button id="downloadCho" class="btn">Download .cho</button>
-  <button id="shareLink" class="btn">Share Link</button>
-  <button id="exportPdf" class="btn">Export PDF / Print</button>
+      <div class="controls no-print" style="margin-top:10px">
+        <button id="loadExample" class="btn ghost">Load example</button>
+        <button id="render" class="btn primary">Render</button>
+        <button id="downloadCho" class="btn">Download .cho</button>
+        <button id="shareLink" class="btn">Share Link</button>
+        <button id="exportPdf" class="btn">Export PDF / Print</button>
 
-  <div class="right">
-    <label for="keySelect" style="font-weight:600;margin-right:6px;color:#333">Select Key:</label>
-    <select id="keySelect" aria-label="Transpose to key" title="Transpose to key">
-      <option value="">(original)</option>
-    </select>
-  </div>
-</div>
+        <div class="right">
+          <label for="keySelect" style="font-weight:600;margin-right:6px;color:#333">Select Key:</label>
+          <select id="keySelect" aria-label="Transpose to key" title="Transpose to key">
+            <option value="">(original)</option>
+          </select>
+        </div>
+      </div>
+
       <div class="hint">Tip: Select a target key to transpose the song. The Share Link copies a URL that loads the song into the editor and viewer.</div>
     </div>
 
@@ -264,14 +267,14 @@ function parseChordPro(text){
 }
 
 // Render pipeline
-//function render(){
- // const raw = document.getElementById('source').value || '';
+function render(){
+  const raw = document.getElementById('source').value || '';
   // detect original key (accepts e.g. "C", "F#", "Am", "Dbm" etc.)
-  //const m = raw.match(/\{key:\s*([A-G][#b]?m?)\s*\}/i);
- // if(m){
- //   songOriginalKey = m[1].replace(/\s+/g,'');
- // } else {
-//    songOriginalKey = null;
+  const m = raw.match(/\{key:\s*([A-G][#b]?m?)\s*\}/i);
+  if(m){
+    songOriginalKey = m[1].replace(/\s+/g,'');
+  } else {
+    songOriginalKey = null;
   }
   // update dropdown selection default if original exists
   updateKeySelect(songOriginalKey);

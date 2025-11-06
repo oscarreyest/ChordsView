@@ -1,22 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ChordPro Viewer</title>
   <style>
     body {
       font-family: "Georgia", serif;
       background: #f9f9f9;
-      color: #222;
       margin: 0;
       padding: 20px;
+      color: #222;
       line-height: 1.6;
     }
     h1 {
       text-align: center;
       margin-bottom: 1em;
       font-family: "Helvetica Neue", sans-serif;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    button, select {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover, select:hover {
+      background: #eee;
     }
     .container {
       display: grid;
@@ -64,24 +82,6 @@
       font-weight: bold;
       display: block;
       margin-bottom: 0.2em;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 20px 0;
-    }
-    button, select {
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid #aaa;
-      cursor: pointer;
-      background: #fff;
-      font-size: 14px;
-    }
-    button:hover, select:hover {
-      background: #eee;
     }
     footer {
       text-align: center;
@@ -145,19 +145,19 @@
     function transposeChord(chord, targetKey) {
       const majorKeys = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
       const semitones = majorKeys.length;
-      let baseChord = chord.match(/^[A-G][b#]?/);
-      if (!baseChord) return chord;
+      let base = chord.match(/^[A-G][b#]?/);
+      if (!base) return chord;
 
       const isMinor = chord.includes("m") && !chord.includes("maj");
-      let root = baseChord[0];
-      let oldIndex = majorKeys.indexOf(currentKey.replace("m",""));
-      let newIndex = majorKeys.indexOf(targetKey.replace("m",""));
-      if (oldIndex === -1 || newIndex === -1) return chord;
+      const root = base[0];
+      const oldIdx = majorKeys.indexOf(currentKey.replace("m",""));
+      const newIdx = majorKeys.indexOf(targetKey.replace("m",""));
+      if (oldIdx === -1 || newIdx === -1) return chord;
 
-      let shift = (newIndex - oldIndex + semitones) % semitones;
+      const shift = (newIdx - oldIdx + semitones) % semitones;
       let newRoot = majorKeys[(majorKeys.indexOf(root.replace("m","")) + shift) % semitones];
       if (isMinor && !newRoot.endsWith("m")) newRoot += "m";
-      return chord.replace(baseChord[0], newRoot);
+      return chord.replace(base[0], newRoot);
     }
 
     function parseChordPro(text, transposeTo) {
@@ -165,11 +165,9 @@
       let html = "";
       let inSection = null;
       for (let line of lines) {
-        if (!line.trim()) {
-          html += "<br/>";
-          continue;
-        }
-        let matchTag = line.match(/^\{(.*?):(.*?)\}$/);
+        if (!line.trim()) { html += "<br/>"; continue; }
+
+        const matchTag = line.match(/^\{(.*?):(.*?)\}$/);
         if (matchTag) {
           const tag = matchTag[1].trim().toLowerCase();
           const value = matchTag[2].trim();
@@ -200,8 +198,7 @@
           }
           continue;
         }
-        // Handle chords inline: [Am]Text
-        let renderedLine = line.replace(/\[([^\]]+)\]/g, (m, chord) => {
+        const renderedLine = line.replace(/\[([^\]]+)\]/g, (m, chord) => {
           const transposed = transposeChord(chord, transposeTo);
           return `<span class="chord">${transposed}</span>`;
         });
@@ -211,10 +208,10 @@
     }
 
     function renderSong() {
-      const input = document.getElementById("chordProInput").value;
+      const text = document.getElementById("chordProInput").value;
       const targetKey = document.getElementById("transposeSelect").value || currentKey;
       const viewer = document.getElementById("viewer");
-      viewer.innerHTML = parseChordPro(input, targetKey);
+      viewer.innerHTML = parseChordPro(text, targetKey);
     }
 
     function downloadChordPro() {
@@ -236,7 +233,6 @@
       }
     }
 
-    // Initialize
     fillKeySelect();
   </script>
 

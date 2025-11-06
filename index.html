@@ -29,8 +29,8 @@
   pre{font-family:"Courier New",Courier,monospace;white-space:pre;margin:6px 0;padding:4px 6px;border-radius:4px;background:#fff;border:1px solid #eee;line-height:1.45;font-size:15px}
   .chorus{border-left:3px solid var(--accent-quiet);background:#fcfeff;padding:8px;border-radius:6px}
   .bridge{border-left:3px dashed #f7f3e6;background:#fffef9;padding:8px;border-radius:6px}
-  .tab pre{background:#0b1220;color:#cfe8ff;overflow:auto}
   .comment{color:var(--muted);font-style:italic;margin:6px 0;padding-left:6px;border-left:2px solid #f0f0f0}
+  .comment-box{border:1px dashed #bbb;padding:6px 8px;border-radius:6px;color:#444;margin:8px 0;background:#f9fafb;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-style:italic}
   .chord-strong{font-weight:700}
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
   @media print{body{background:white}.wrap{margin:10mm auto;padding:0}.controls,.no-print{display:none!important}.viewer{box-shadow:none;padding:0;border-radius:0}pre{font-size:12px}.title{font-size:22px}}
@@ -40,7 +40,7 @@
   <div class="wrap">
     <header>
       <h1>ChordPro Viewer</h1>
-      <p>Music-sheet style viewer with transpose, share link, PDF export, and full tag support.</p>
+      <p>Music-sheet style viewer with transpose, share link, PDF export, comments, and full tag support.</p>
     </header>
 
     <div class="card">
@@ -113,13 +113,20 @@ function parseChordPro(text){
     const kv=line.match(/^\{([^:}]+):\s*(.*?)\}$/);
     if(kv){
       const tag=kv[1].toLowerCase(),val=kv[2];
-      meta[tag]=val;continue;
+      // meta tags
+      if(['title','artist','key'].includes(tag)){ meta[tag]=val; continue; }
+      // visible tags
+      if(tag==='comment' || tag==='comment_italic'){ parts.push(`<div class="comment">${esc(val)}</div>`); continue; }
+      if(tag==='comment_box'){ parts.push(`<div class="comment-box">${esc(val)}</div>`); continue; }
+      if(tag==='subtitle'){ parts.push(`<div class="subtitle">${esc(val)}</div>`); continue; }
+      continue;
     }
     if(!line){parts.push('<div style="height:10px"></div>');continue;}
     parts.push(renderLineTwoRow(line));
   }
   let metaHtml='<div class="song-meta">';
   if(meta.title)metaHtml+=`<div class="title">${esc(meta.title)}</div>`;
+  if(meta.subtitle)metaHtml+=`<div class="subtitle">${esc(meta.subtitle)}</div>`;
   if(meta.artist)metaHtml+=`<div class="meta-row">Artist: ${esc(meta.artist)}</div>`;
   if(meta.key)metaHtml+=`<div class="meta-row">Key: ${esc(meta.key)}</div>`;
   metaHtml+='</div>';
@@ -163,8 +170,10 @@ document.getElementById('loadExample').onclick=()=>{
   document.getElementById('source').value=`{title: Amazing Grace}
 {artist: John Newton}
 {key: G}
+{comment: A beloved traditional hymn}
 [G]Amazing [C]grace, how [G]sweet the [D]sound
-That [G]saved a [C]wretch like [D]me`;
+That [G]saved a [C]wretch like [D]me
+{comment_box: Play gently, slow tempo}`;
   render();
 };
 
@@ -191,7 +200,7 @@ document.getElementById('exportPdf').onclick=()=>{
   const w=window.open('','_blank');
   const c=document.getElementById('outputArea').innerHTML;
   w.document.write(`<!doctype html><html><head><title>ChordPro Song</title>
-  <style>body{font-family:Georgia,serif;margin:28px;}pre{font-family:monospace;font-size:13px;} .chord-strong{font-weight:bold}</style>
+  <style>body{font-family:Georgia,serif;margin:28px;}pre{font-family:monospace;font-size:13px;} .chord-strong{font-weight:bold}.comment{color:#555;font-style:italic;margin:4px 0}</style>
   </head><body>${c}</body></html>`);
   w.document.close();setTimeout(()=>w.print(),300);
 };

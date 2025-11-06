@@ -3,105 +3,162 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChordPro Viewer — Full Tag + PDF</title>
+<title>ChordPro Viewer — Music Sheet Style</title>
 <style>
-  :root{--bg:#f6f8fb;--card:#fff;--muted:#6b7280;--accent:#1f6feb}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:18px;background:var(--bg);color:#111}
-  .container{max-width:920px;margin:0 auto}
-  header h1{margin:0;font-size:20px}
-  header p{margin:6px 0 14px;color:var(--muted)}
-  textarea{width:100%;min-height:180px;font-family:monospace;padding:10px;border-radius:6px;border:1px solid #ddd;box-sizing:border-box}
-  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .btn{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:6px;cursor:pointer}
-  .btn.secondary{background:white;color:var(--accent);border:1px solid rgba(31,111,235,0.14)}
-  .meta{margin:12px 0}
-  .song-title{font-size:1.5rem;font-weight:700;margin:0}
-  .song-sub{color:var(--muted);margin:4px 0 8px}
-  .meta-row{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:0.95rem}
-  .viewer{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 2px 8px rgba(16,24,40,0.04)}
-  pre { font-family:monospace; white-space:pre; margin:6px 0; padding:8px; border-radius:6px; background:#ffffff; border:1px solid #eee; line-height:1.45; font-size:15px; }
+  /* -- Overall layout -- */
+  :root{
+    --page-bg: #fbfbfb;
+    --card-bg: #ffffff;
+    --muted: #6b7280;
+    --accent: #1f6feb;
+    --accent-quiet: #e6f0ff;
+  }
+  html,body{height:100%;margin:0;background:var(--page-bg);font-family:Georgia, "Times New Roman", serif;color:#111}
+  .wrap{max-width:920px;margin:28px auto;padding:18px}
+  header h1{margin:0;font-size:28px;letter-spacing:0.2px}
+  header p{margin:6px 0 18px;color:var(--muted);font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif}
+
+  /* -- Editor card -- */
+  .card{background:var(--card-bg);border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(16,24,40,0.04);margin-bottom:14px}
+  textarea#source{width:100%;min-height:210px;padding:12px;border-radius:6px;border:1px solid #e8eefc;box-sizing:border-box;font-family:monospace;font-size:14px;line-height:1.4;color:#111}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+  .btn{
+    background:transparent;border:1px solid var(--accent);color:var(--accent);padding:8px 12px;border-radius:8px;cursor:pointer;font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.ghost{background:transparent;border:1px solid #d6dbe8;color:#234;box-shadow:none}
+  .controls .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+  /* -- Viewer (music-sheet style) -- */
+  .viewer{background:var(--card-bg);padding:18px;border-radius:10px;box-shadow:0 2px 8px rgba(16,24,40,0.04)}
+  .song-meta{margin-bottom:12px}
+  .title{font-family: "Palatino Linotype","Book Antiqua", Palatino, Georgia, serif;font-size:28px;font-weight:700;margin:0}
+  .subtitle{font-style:italic;color:var(--muted);margin-top:4px;margin-bottom:6px}
+  .meta-row{font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;color:var(--muted);font-size:0.95rem}
+  .music-block{margin:12px 0}
+
+  /* monospace for printed lines */
+  pre { font-family: "Courier New", Courier, monospace; white-space: pre; margin:6px 0; padding:4px 6px; border-radius:4px; background:#fff; border:1px solid #eee; line-height:1.45; font-size:15px; }
   .section-label{font-style:italic;color:var(--muted);margin:6px 0;font-size:0.95rem}
-  .chorus{border-left:3px solid #e6f0ff;background:#fbfdff;padding:8px;border-radius:6px}
+  .chorus{border-left:3px solid var(--accent-quiet);background:#fcfeff;padding:8px;border-radius:6px}
   .bridge{border-left:3px dashed #f7f3e6;background:#fffef9;padding:8px;border-radius:6px}
   .tab pre{background:#0b1220;color:#cfe8ff;overflow:auto}
-  .comment{color:var(--muted);font-style:italic;margin:6px 0}
-  .unknown-tag{color:#444;font-size:0.92rem;background:#f7f7f7;padding:6px;border-radius:6px;margin:6px 0}
-  footer{color:var(--muted);font-size:13px;text-align:center;margin-top:18px}
-  @media (max-width:560px){ .song-title{font-size:1.25rem} pre{font-size:14px} }
+  .comment{color:var(--muted);font-style:italic;margin:6px 0;padding-left:6px;border-left:2px solid #f0f0f0}
+
+  /* small helper text */
+  .hint{font-size:13px;color:var(--muted);margin-top:6px;font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif}
+
+  /* footer */
+  footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+
+  /* Print styles */
+  @media print {
+    body{background:white}
+    .wrap{margin:10mm auto;padding:0}
+    .controls, .no-print{display:none !important}
+    .viewer{box-shadow:none;padding:0;border-radius:0}
+    pre{font-size:12px}
+    .title{font-size:22px}
+  }
+
+  @media (max-width:620px){
+    .title{font-size:20px}
+    pre{font-size:13px}
+  }
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>ChordPro Viewer — Full Tag + PDF</h1>
-    <p class="meta">Paste your ChordPro text below. Supports metadata tags, block directives, transpose, and export to PDF/Print.</p>
-  </header>
+  <div class="wrap">
+    <header>
+      <h1>ChordPro Viewer</h1>
+      <p>Music-sheet style viewer with tag support, transpose, PDF export, download and share link (works anywhere).</p>
+    </header>
 
-  <div style="margin-bottom:12px">
-    <textarea id="source" placeholder="{title: Song}\n{artist: Someone}\n[C]Hello [G]world"></textarea>
-    <div class="controls" style="margin-top:8px">
-      <button id="loadExample" class="btn secondary">Load Example</button>
-      <button id="render" class="btn">Render</button>
-      <button id="exportPdf" class="btn secondary">Export PDF / Print</button>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <button id="transposeDown" class="btn secondary">Transpose −</button>
-        <span id="transposeVal" style="min-width:28px;text-align:center">0</span>
-        <button id="transposeUp" class="btn secondary">Transpose +</button>
+    <!-- Editor card -->
+    <div class="card">
+      <label for="source" style="display:block;font-weight:600;margin-bottom:8px">ChordPro source</label>
+      <textarea id="source" placeholder="{title: Song}\n{artist: Someone}\n[C]Hello [G]world"></textarea>
+
+      <div class="controls no-print" style="margin-top:10px">
+        <button id="loadExample" class="btn ghost">Load example</button>
+        <button id="render" class="btn primary">Render</button>
+        <button id="downloadCho" class="btn">Download .cho</button>
+        <button id="shareLink" class="btn">Share Link</button>
+        <button id="exportPdf" class="btn">Export PDF / Print</button>
+
+        <div class="right">
+          <button id="transposeDown" class="btn">Transpose −</button>
+          <div style="min-width:34px;text-align:center;font-weight:600" id="transposeVal">0</div>
+          <button id="transposeUp" class="btn">Transpose +</button>
+        </div>
       </div>
+
+      <div class="hint">Tip: use the Share Link to copy a URL that loads the song into both the editor and viewer. Use Export to create a print-friendly PDF.</div>
     </div>
+
+    <!-- Viewer -->
+    <div id="outputArea" class="viewer card" aria-live="polite"></div>
+
+    <footer>
+      Built for GitHub Pages — embed with an iframe or use directly.
+    </footer>
   </div>
 
-  <div id="outputArea" class="viewer"></div>
-
-  <footer>
-    Host on GitHub Pages or embed via iframe into Google Sites.
-  </footer>
-</div>
-
 <script>
-// --- basic setup ---
-const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const flatToSharp={Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
-let transposeSteps=0;
+/* ======= ChordPro Viewer (music-sheet style) ======= 
+   Features:
+   - Parses common ChordPro tags & block directives
+   - Renders chords above lyrics
+   - Transpose +/- (root and bass)
+   - Export to Print/PDF, Download .cho, Share Link (?song=BASE64)
+   - Loads from ?song=... automatically into editor + renders
+*/
 
-// --- helpers ---
+// --- Notes and helpers ---
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT_TO_SHARP = { Db:'C#', Eb:'D#', Gb:'F#', Ab:'G#', Bb:'A#' };
+let transposeSteps = 0;
+
+// basic HTML escape
 function esc(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// transpose a token like "C#m7/G#"
-function transposeChordToken(token,steps){
-  const parts=token.split('/');
-  const main=parts[0], bass=parts[1];
-  const transSingle=(ch)=>{
-    const m=ch.match(/^([A-G])([#b])?(.*)$/);
+// --- Transpose utilities ---
+function transposeChordToken(token, steps){
+  // token like "C#m7/G#"
+  const parts = token.split('/');
+  const main = parts[0], bass = parts[1];
+  const transSingle = (ch) => {
+    const m = ch.match(/^([A-G])([#b])?(.*)$/);
     if(!m) return ch;
-    let [,root,acc,rest]=m;
-    let full=root+(acc||'');
-    if(flatToSharp[full]) full=flatToSharp[full];
-    let idx=NOTES.indexOf(full);
-    if(idx===-1) return ch;
-    let ni=(idx+steps)%12; if(ni<0) ni+=12;
-    return NOTES[ni]+(rest||'');
+    let [, root, acc, rest] = m;
+    let full = root + (acc || '');
+    if(FLAT_TO_SHARP[full]) full = FLAT_TO_SHARP[full];
+    let idx = NOTES.indexOf(full);
+    if(idx === -1) return ch;
+    let ni = (idx + steps) % 12;
+    if(ni < 0) ni += 12;
+    return NOTES[ni] + (rest || '');
   };
-  return bass ? transSingle(main)+'/'+transSingle(bass) : transSingle(main);
+  return bass ? transSingle(main) + '/' + transSingle(bass) : transSingle(main);
 }
 
-// apply transpose across text (only inside brackets)
-function applyTransposeToText(text,steps){
-  return text.replace(/\[([^\]]+)\]/g, (_, chordText) => {
-    const tokens = chordText.split(/\s+/).map(t=>t.trim()).filter(Boolean);
+function applyTransposeToText(text, steps){
+  // transpose inside [ ... ]
+  return text.replace(/\[([^\]]+)\]/g, function(_, chordText){
+    const tokens = chordText.split(/\s+/).map(t => t.trim()).filter(Boolean);
     return '[' + tokens.map(t => transposeChordToken(t, steps)).join(' ') + ']';
   });
 }
 
-// render single line into two-row (chords above lyrics)
+// --- Two-row renderer (chords above lyrics) ---
 function renderLineTwoRow(line){
-  let chordLine='', lyricLine='', inChord=false, chordBuf='';
+  let chordLine = '', lyricLine = '', inChord=false, chordBuf='';
   for(let i=0;i<line.length;i++){
-    const ch=line[i];
-    if(ch==='['){ inChord=true; chordBuf=''; }
-    else if(ch===']'){ inChord=false;
+    const ch = line[i];
+    if(ch === '['){ inChord = true; chordBuf = ''; }
+    else if(ch === ']'){ inChord = false;
       const pad = lyricLine.length - chordLine.length;
-      if(pad>0) chordLine += ' '.repeat(pad);
+      if(pad > 0) chordLine += ' '.repeat(pad);
       chordLine += chordBuf;
     } else if(inChord) chordBuf += ch;
     else lyricLine += ch;
@@ -111,90 +168,83 @@ function renderLineTwoRow(line){
   return '<div style="height:8px"></div>';
 }
 
-// --- main parser ---
+// --- Parser: metadata + blocks + inline comments + tab blocks ---
 function parseChordPro(text){
   const lines = text.replace(/\r/g,'').split('\n');
   const meta = {};
   const otherTags = {};
-  const outputParts = [];
+  const out = [];
   let blockStack = [];
   let blockType = null;
 
   function openBlock(type){
     blockStack.push(type);
     blockType = type;
-    if(type==='chorus') outputParts.push('<div class="chorus"><div class="section-label">Chorus</div>');
-    else if(type==='bridge') outputParts.push('<div class="bridge"><div class="section-label">Bridge</div>');
-    else if(type==='tab') outputParts.push('<div class="tab">');
-    else if(type==='comment_box') outputParts.push('<div class="comment" style="border:1px solid #eee;padding:8px;background:#fff">');
+    if(type === 'chorus') out.push('<div class="chorus"><div class="section-label">Chorus</div>');
+    else if(type === 'bridge') out.push('<div class="bridge"><div class="section-label">Bridge</div>');
+    else if(type === 'tab') out.push('<div class="tab">');
+    else if(type === 'comment_box') out.push('<div class="comment" style="border-left:4px solid #eee;padding-left:8px">');
   }
   function closeBlock(){
-    if(blockStack.length===0) return;
-    const top = blockStack.pop();
-    if(top==='chorus' || top==='bridge' || top==='tab' || top==='comment_box') outputParts.push('</div>');
+    if(blockStack.length === 0) return;
+    const t = blockStack.pop();
+    if(t === 'chorus' || t === 'bridge' || t === 'tab' || t === 'comment_box') out.push('</div>');
     blockType = blockStack[blockStack.length-1] || null;
   }
 
-  for(let rawLine of lines){
-    const line = rawLine.trimEnd();
+  for(let raw of lines){
+    const line = raw.trimEnd();
 
-    // match {tag: value} or {tag}
-    const tagKV = line.match(/^\{([^:}]+):\s*(.*?)\}$/);
-    const tagToken = line.match(/^\{([a-zA-Z0-9_\-]+)\}$/);
+    // {tag: value}
+    const kv = line.match(/^\{([^:}]+):\s*(.*?)\}$/);
+    // {tag}
+    const token = line.match(/^\{([a-zA-Z0-9_\-]+)\}$/);
 
-    if(tagKV){
-      const tag = tagKV[1].toLowerCase();
-      const val = tagKV[2];
+    if(kv){
+      const tag = kv[1].toLowerCase();
+      const val = kv[2];
       if(['title','subtitle','artist','album','composer','lyricist','capo','key','time','tempo','language','duration','arranger'].includes(tag)){
         meta[tag] = val;
       } else if(['comment','comment_italic','comment_box'].includes(tag)){
-        if(tag==='comment_italic') outputParts.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`);
-        else outputParts.push(`<div class="comment">${esc(val)}</div>`);
+        if(tag === 'comment_italic') out.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`);
+        else out.push(`<div class="comment">${esc(val)}</div>`);
       } else {
         otherTags[tag] = val;
       }
       continue;
-    } else if(tagToken){
-      const token = tagToken[1].toLowerCase();
-      if(['start_of_chorus','soc','start_chorus'].includes(token)){ openBlock('chorus'); continue; }
-      if(['end_of_chorus','eoc','end_chorus'].includes(token)){ closeBlock(); continue; }
-      if(['start_of_bridge','start_bridge'].includes(token)){ openBlock('bridge'); continue; }
-      if(['end_of_bridge','end_bridge'].includes(token)){ closeBlock(); continue; }
-      if(['start_of_tab','start_tab'].includes(token)){ openBlock('tab'); continue; }
-      if(['end_of_tab','end_tab'].includes(token)){ closeBlock(); continue; }
-      if(['start_of_comment','comment_box'].includes(token)){ openBlock('comment_box'); continue; }
-      if(['end_of_comment','end_comment'].includes(token)){ closeBlock(); continue; }
-      // structural labels like {verse}, {chorus}, {bridge}
-      if(['verse','chorus','bridge','refrain','solo'].includes(token)){
-        outputParts.push(`<div class="section-label">${esc(token.toUpperCase())}</div>`);
+    } else if(token){
+      const tkn = token[1].toLowerCase();
+      if(['start_of_chorus','soc','start_chorus'].includes(tkn)){ openBlock('chorus'); continue; }
+      if(['end_of_chorus','eoc','end_chorus'].includes(tkn)){ closeBlock(); continue; }
+      if(['start_of_bridge','start_bridge'].includes(tkn)){ openBlock('bridge'); continue; }
+      if(['end_of_bridge','end_bridge'].includes(tkn)){ closeBlock(); continue; }
+      if(['start_of_tab','start_tab'].includes(tkn)){ openBlock('tab'); continue; }
+      if(['end_of_tab','end_tab'].includes(tkn)){ closeBlock(); continue; }
+      if(['start_of_comment','comment_box'].includes(tkn)){ openBlock('comment_box'); continue; }
+      if(['end_of_comment','end_comment'].includes(tkn)){ closeBlock(); continue; }
+      if(['verse','chorus','bridge','refrain','solo'].includes(tkn)){
+        out.push(`<div class="section-label">${esc(tkn.toUpperCase())}</div>`);
         continue;
       }
-      // unknown single token — show for debugging
-      outputParts.push(`<div class="unknown-tag">{${esc(token)}}</div>`);
+      out.push(`<div class="unknown-tag">{${esc(tkn)}}</div>`);
       continue;
     }
 
-    // blank line -> small gap
-    if(line.trim()===''){ outputParts.push('<div style="height:10px"></div>'); continue; }
-
-    // if inside tab block, display raw pre
-    if(blockType==='tab'){ outputParts.push(`<pre>${esc(line)}</pre>`); continue; }
-
-    // normal lyric/chord line
-    outputParts.push(renderLineTwoRow(line));
+    if(line.trim() === ''){ out.push('<div style="height:10px"></div>'); continue; }
+    if(blockType === 'tab'){ out.push(`<pre>${esc(line)}</pre>`); continue; }
+    out.push(renderLineTwoRow(line));
   }
 
-  // close any remaining blocks
   while(blockStack.length) closeBlock();
 
-  // build metadata header
-  let metaHtml = '<div class="meta">';
-  if(meta.title) metaHtml += `<div class="song-title">${esc(meta.title)}</div>`;
-  if(meta.subtitle) metaHtml += `<div class="song-sub">${esc(meta.subtitle)}</div>`;
+  // metadata header
+  let metaHtml = '<div class="song-meta">';
+  if(meta.title) metaHtml += `<div class="title">${esc(meta.title)}</div>`;
+  if(meta.subtitle) metaHtml += `<div class="subtitle">${esc(meta.subtitle)}</div>`;
   if(meta.artist || meta.album){
     metaHtml += '<div class="meta-row">';
-    if(meta.artist) metaHtml += `<div class="song-artist">Artist: ${esc(meta.artist)}</div>`;
-    if(meta.album) metaHtml += `<div class="song-artist">Album: ${esc(meta.album)}</div>`;
+    if(meta.artist) metaHtml += `<div>Artist: ${esc(meta.artist)}</div>`;
+    if(meta.album) metaHtml += `<div>Album: ${esc(meta.album)}</div>`;
     metaHtml += '</div>';
   }
   const extras = [];
@@ -205,35 +255,33 @@ function parseChordPro(text){
   if(extras.length) metaHtml += `<div class="meta-row" style="margin-top:6px">${extras.join(' • ')}</div>`;
 
   if(Object.keys(otherTags).length){
-    metaHtml += '<div style="margin-top:8px"><strong>Other tags:</strong> ';
-    metaHtml += Object.keys(otherTags).map(k => `<span style="margin-right:10px">${esc(k)}: ${esc(otherTags[k])}</span>`).join('');
+    metaHtml += '<div style="margin-top:8px;color:#444;font-size:0.95rem"><strong>Other tags:</strong> ';
+    metaHtml += Object.keys(otherTags).map(k => `${esc(k)}: ${esc(otherTags[k])}`).join(' • ');
     metaHtml += '</div>';
   }
 
   metaHtml += '</div>';
-  return metaHtml + outputParts.join('\n');
+  return metaHtml + out.join('\n');
 }
 
-// --- render pipeline ---
+// --- Render pipeline ---
 function render(){
   const raw = document.getElementById('source').value || '';
   const transApplied = applyTransposeToText(raw, transposeSteps);
   const html = parseChordPro(transApplied);
-  document.getElementById('outputArea').innerHTML = html;
+  document.getElementById('outputArea').innerHTML = `<div class="music-block">${html}</div>`;
   document.getElementById('transposeVal').textContent = transposeSteps;
 }
 
-// --- controls ---
+// --- Controls wiring ---
 document.getElementById('render').addEventListener('click', render);
 document.getElementById('transposeUp').addEventListener('click', ()=>{ transposeSteps++; render(); });
 document.getElementById('transposeDown').addEventListener('click', ()=>{ transposeSteps--; render(); });
-
-document.getElementById('loadExample').addEventListener('click', ()=>{
+document.getElementById('loadExample').addEventListener('click', ()=> {
   document.getElementById('source').value =
 `{title: Amazing Grace}
 {subtitle: A classic hymn}
 {artist: Traditional}
-{album: Hymns}
 {composer: John Newton}
 {key: C}
 {capo: 0}
@@ -254,39 +302,99 @@ e|------------------|
 B|------------------|
 {end_of_tab}
 
-{comment_box: This viewer shows tags and structural blocks.}
+{comment_box: This viewer supports tags, blocks, transpose, PDF export, download and share links.}
 `;
   render();
 });
 
-// --- Export to PDF / Print ---
+// --- Download .cho (raw ChordPro source) ---
+document.getElementById('downloadCho').addEventListener('click', ()=>{
+  const text = document.getElementById('source').value || '';
+  let filename = 'song.cho';
+  // attempt to use {title: ...} as filename
+  const m = text.match(/^\s*\{title:\s*(.+?)\}\s*$/im) || text.match(/^\s*\{title:\s*(.+?)\}/im);
+  if(m && m[1]) filename = m[1].trim().toLowerCase().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_') + '.cho';
+  const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 200);
+});
+
+// --- Share Link (copies current page URL with ?song=BASE64) ---
+function encodeForUrl(s){
+  // safe base64 encoding for Unicode
+  try{
+    return btoa(unescape(encodeURIComponent(s)));
+  }catch(e){
+    // fallback simple encodeURIComponent
+    return encodeURIComponent(s);
+  }
+}
+function decodeFromUrl(s){
+  try{
+    return decodeURIComponent(escape(atob(s)));
+  }catch(e){
+    try{ return decodeURIComponent(s); }catch(e2){ return s; }
+  }
+}
+
+document.getElementById('shareLink').addEventListener('click', async ()=>{
+  const text = document.getElementById('source').value || '';
+  const encoded = encodeForUrl(text);
+  // build URL using current location (so it works anywhere)
+  const url = location.origin + location.pathname + '?song=' + encoded;
+  try{
+    await navigator.clipboard.writeText(url);
+    const btn = document.getElementById('shareLink');
+    const prev = btn.textContent;
+    btn.textContent = 'Link copied ✓';
+    setTimeout(()=>{ btn.textContent = prev; }, 1500);
+  }catch(e){
+    prompt('Copy this link:', url);
+  }
+});
+
+// --- Load from ?song=... on page load (auto-populates editor + renders) ---
+function loadFromQuery(){
+  const params = new URLSearchParams(location.search);
+  if(params.has('song')){
+    const encoded = params.get('song');
+    const decoded = decodeFromUrl(encoded);
+    document.getElementById('source').value = decoded;
+    // render it automatically
+    transposeSteps = 0;
+    render();
+  }
+}
+loadFromQuery();
+
+// --- Export to PDF / Print: open a print-friendly window with content ---
 document.getElementById('exportPdf').addEventListener('click', ()=>{
   const content = document.getElementById('outputArea').innerHTML;
-  const title = document.querySelector('.song-title')?.textContent || 'ChordPro Song';
+  const title = (document.querySelector('.title') && document.querySelector('.title').textContent) || 'ChordPro Song';
   const printWindow = window.open('', '_blank');
   const css = `
-    body{font-family: Arial, sans-serif; margin:30px; color:#111; background:#fff}
-    .meta { margin-bottom:18px; }
-    .song-title{ font-size:1.5rem; font-weight:700; margin-bottom:6px; }
-    .song-sub{ color:#555; margin-bottom:8px; }
-    .meta-row{ color:#555; font-size:1rem; margin-bottom:8px; }
-    pre{ font-family:monospace; white-space:pre; margin:6px 0; font-size:14px; line-height:1.4 }
-    .chorus, .bridge, .tab, .comment{ border:none; background:#f8f8f8; padding:8px; margin:6px 0; border-radius:4px }
-    .section-label{ font-style:italic; color:#666; margin:4px 0; }
+    body{font-family: Georgia, "Times New Roman", serif; margin:28px; color:#111; background:#fff}
+    .title{font-size:22px;font-weight:700;margin-bottom:6px}
+    .subtitle{font-style:italic;color:#666;margin-bottom:8px}
+    .meta-row{color:#666;margin-bottom:8px}
+    pre{font-family: "Courier New", Courier, monospace; font-size:13px; line-height:1.35; margin:6px 0}
+    .chorus, .bridge, .tab, .comment{ background:#f9f9f9; padding:6px; margin:6px 0; border-radius:4px; }
+    .section-label{font-style:italic;color:#666;margin:4px 0}
     @media print {
-      body{ margin:12mm; }
-      .no-print{ display:none; }
-      pre{ font-size:12px; }
+      body{margin:12mm}
+      pre{font-size:11px}
     }
   `;
   printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${css}</style></head><body>${content}</body></html>`);
   printWindow.document.close();
   printWindow.focus();
-  // give it a short moment then call print to ensure fonts load
   setTimeout(()=>{ printWindow.print(); }, 250);
 });
 
-// auto-render initial empty state
+// auto-render empty state so UI shows something consistent
 render();
 </script>
 </body>

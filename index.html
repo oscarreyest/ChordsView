@@ -269,28 +269,26 @@ function parseChordPro(text){
 // Render pipeline
 function render(){
   const raw = document.getElementById('source').value || '';
+
   // detect original key (accepts e.g. "C", "F#", "Am", "Dbm" etc.)
   const m = raw.match(/\{key:\s*([A-G][#b]?m?)\s*\}/i);
-  if(m){
-    songOriginalKey = m[1].replace(/\s+/g,'');
-  } else {
-    songOriginalKey = null;
-  }
-  // update dropdown selection default if original exists
-  updateKeySelect(songOriginalKey);
-  // compute steps based on current select value (if any)
-  const sel = document.getElementById('keySelect').value;
-  if(sel && songOriginalKey){
-    const steps = computeSemitoneDiff(songOriginalKey, sel);
-    transposeSteps = steps;
-  } else {
-    transposeSteps = 0;
-  }
+  songOriginalKey = m ? m[1].trim() : null;
 
+  // ensure dropdown is filled and reflects original key
+  fillKeySelect();
+  updateKeySelect(songOriginalKey);
+
+  // compute steps based on selected target key
+  const sel = document.getElementById('keySelect').value;
+  transposeSteps = (sel && songOriginalKey) ? computeSemitoneDiff(songOriginalKey, sel) : 0;
+
+  // apply transpose
   const transApplied = applyTransposeToText(raw, transposeSteps);
+
+  // parse and render ChordPro to HTML
   const html = parseChordPro(transApplied);
+
   document.getElementById('outputArea').innerHTML = `<div class="music-block">${html}</div>`;
-  document.getElementById('transposeVal').textContent = transposeSteps;
 }
 
 // --- Key dropdown helpers ---

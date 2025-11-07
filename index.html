@@ -383,8 +383,19 @@ pre{font-family:"Courier New",Courier,monospace;font-size:17px;line-height:1.45;
 
 /* Large Text toggle (instant, temporary) */
 document.getElementById('toggleLargeText').addEventListener('click',()=>{
-  document.getElementById('outputArea').classList.toggle('large-text');
+  const viewer = document.getElementById('outputArea');
+  const btn = document.getElementById('toggleLargeText');
+
+  viewer.classList.toggle('large-text');
+
+  // Update button text
+  if (viewer.classList.contains('large-text')) {
+    btn.textContent = "Normal Text";
+  } else {
+    btn.textContent = "Large Text";
+  }
 });
+
 
 /* Init */
 fillKeySelect();

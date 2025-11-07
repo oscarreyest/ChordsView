@@ -154,6 +154,47 @@ select#keySelect{
 }
 
 /* ---------------------------------------------------------
+   Header box (for explicit/auto header)
+--------------------------------------------------------- */
+.header-box{
+  border:1px solid #dce2ea;
+  border-radius:12px;
+  padding:14px 16px;
+  margin-bottom:12px;
+}
+.header-content{
+  text-align:center;
+}
+.header-badges{
+  display:flex;
+  justify-content:center;  /* alignment A (centered) */
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:10px;
+}
+.header-badge{
+  min-width:26px; height:26px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:800;
+  border-radius:50%;
+  border:2px solid var(--generic-ac);
+  background:#fff;
+  color:#111;
+  padding:0 6px;
+}
+
+/* Color mapping for header badges (same as section badges) */
+.header-badge.type-verse{       border-color:var(--verse-ac); }
+.header-badge.type-prechorus{   border-color:var(--chorus-ac); } /* using chorus-like blue for Pc line? optional tweak */
+.header-badge.type-chorus{      border-color:var(--chorus-ac); }
+.header-badge.type-bridge{      border-color:var(--bridge-ac); }
+.header-badge.type-intro{       border-color:var(--intro-ac); }
+.header-badge.type-interlude{   border-color:var(--interlude-ac); }
+.header-badge.type-outro{       border-color:var(--outro-ac); }
+.header-badge.type-generic{     border-color:var(--generic-ac); }
+
+/* ---------------------------------------------------------
    Section Boxes
 --------------------------------------------------------- */
 .section-box{
@@ -165,7 +206,6 @@ select#keySelect{
   page-break-inside:avoid;
 }
 
-/* Section background colors */
 .section-box.verse      { background:var(--verse-bg); }
 .section-box.chorus     { background:var(--chorus-bg); }
 .section-box.bridge     { background:var(--bridge-bg); }
@@ -174,7 +214,6 @@ select#keySelect{
 .section-box.outro      { background:var(--outro-bg); }
 .section-box.generic    { background:var(--generic-bg); }
 
-/* Title */
 .section-title{
   margin-top:6px;
   font-family:system-ui;
@@ -182,7 +221,7 @@ select#keySelect{
   color:#1f6feb;
 }
 
-/* Badge circle */
+/* Badge circle (in-section) */
 .section-badge{
   position:absolute;
   top:-14px;
@@ -199,7 +238,7 @@ select#keySelect{
   justify-content:center;
 }
 
-/* Colored top line */
+/* Colored top line (in-section) */
 .section-line{
   position:absolute;
   top:0;
@@ -210,9 +249,7 @@ select#keySelect{
   border-radius:3px;
 }
 
-/* ---------------------------------------------------------
-   Section-specific accent coloring
---------------------------------------------------------- */
+/* Color the section accent */
 .section-box.verse      .section-line,
 .section-box.verse      .section-badge{ border-color:var(--verse-ac); background:none; }
 
@@ -232,7 +269,7 @@ select#keySelect{
 .section-box.outro      .section-badge{ border-color:var(--outro-ac); background:none; }
 
 /* ---------------------------------------------------------
-   Lyrics + Chords
+   Lyrics + Chords (normal mode)
 --------------------------------------------------------- */
 pre{
   font-family:"Courier New", monospace;
@@ -245,7 +282,6 @@ pre{
   border:1px solid #eee;
   border-radius:4px;
 }
-
 .chord-strong{
   font-size:17px;
   font-weight:700;
@@ -258,7 +294,6 @@ pre{
   font-size:20px !important;
   line-height:1.75 !important;
 }
-
 .viewer.large-text .chord-strong{
   font-size:21px !important;
 }
@@ -267,59 +302,36 @@ pre{
    Print mode (B&W)
 --------------------------------------------------------- */
 @media print {
-
   body{ margin:12mm; background:white; }
+  .controls, .no-print{ display:none !important; }
+  .viewer{ box-shadow:none; padding:0; column-count:2; column-gap:20mm; }
 
-  .controls,
-  .no-print{
-    display:none !important;
-  }
-
-  .viewer{
-    box-shadow:none;
-    padding:0;
-    column-count:2;
-    column-gap:20mm;
-  }
+  .header-box{ border:1px solid #555 !important; }
+  .header-badge{ border-color:#333 !important; color:#000 !important; background:#fff !important; }
 
   .section-box{
     background:white !important;
     border:1px solid #555 !important;
     break-inside:avoid;
   }
-
-  .section-line{
-    background:#555 !important;
-  }
-
-  .section-badge{
-    background:white !important;
-    border-color:#222 !important;
-    color:black !important;
-  }
+  .section-line{ background:#555 !important; }
+  .section-badge{ background:#fff !important; border-color:#222 !important; color:#000 !important; }
 
   pre{
-    white-space:pre-wrap;
-    word-break:break-word;
-    background:none;
-    border:none;
+    white-space:pre-wrap; word-break:break-word;
+    background:none; border:none;
     font-size:16px;
   }
-
-  .title{
-    font-size:26px;
-  }
-
+  .title{ font-size:26px; }
   @page{ margin:12mm; }
 }
-
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>ChordPro Viewer</h1>
-      <p>Final build: header block, section boxes, badges, transpose, large text, PDF export.</p>
+      <p>Final build: header box with section list badges, section boxes, transpose, large text, PDF export.</p>
     </header>
 
     <div class="card">
@@ -333,8 +345,8 @@ pre{
 {start_header}
 {title: My Song}
 {artist: The Band}
-{comment: Special arrangement}
 {comment_box: For ministry use only}
+{section_list: I, V1, C, B}
 {end_header}
 
 {comment: Intro}
@@ -356,8 +368,7 @@ pre{
       </div>
 
       <div class="hint" style="font-size:13px;color:var(--muted);margin-top:6px;font-family:system-ui,sans-serif">
-        Header block: <code>{start_header} ... {end_header}</code> (raw text, no chord parsing).<br/>
-        Section helpers: <code>{comment: Verse 1}</code>, <code>{start_of_chorus}</code>/<code>{end_of_chorus}</code>, <code>{prechorus}</code>, <code>{bridge}</code>, <code>{interlude}</code>, etc.
+        Header block: <code>{start_header} ... {end_header}</code> (raw). Add <code>{section_list: I, V1, C, B}</code> to show header badges.
       </div>
     </div>
 
@@ -450,13 +461,41 @@ function autoBadgeFrom(type, title){
   }
 }
 
+/* ========= SECTION LIST (header badges) ========= */
+function mapSectionToken(tokRaw){
+  if(!tokRaw) return {type:'generic', text:tokRaw||''};
+  const t = tokRaw.trim().toUpperCase();
+
+  if(t==='I' || t==='INTRO') return {type:'intro', text:'I'};
+  if(/^V\d+$/.test(t))       return {type:'verse', text:t};   // V1, V2...
+  if(t==='V')                return {type:'verse', text:'V'};
+  if(t==='C' || t==='CH')    return {type:'chorus', text:'C'};
+  if(t==='B' || t==='BR')    return {type:'bridge', text:'B'};
+  if(t==='PC' || t==='P' || t==='PRE' || t==='PCH') return {type:'prechorus', text:'Pc'};
+  if(t==='IT' || t==='INT' || t==='INTERLUDE') return {type:'interlude', text:'It'};
+  if(t==='O' || t==='OUTRO') return {type:'outro', text:'O'};
+
+  // Fallback: try to infer Verse number like V1
+  const m = t.match(/^V(\d+)$/); if(m) return {type:'verse', text:'V'+m[1]};
+  return {type:'generic', text:t};
+}
+function buildHeaderBadges(sectionListStr){
+  if(!sectionListStr) return '';
+  const tokens = sectionListStr.split(',').map(s=>s.trim()).filter(Boolean);
+  if(!tokens.length) return '';
+  const items = tokens.map(tok=>{
+    const {type, text} = mapSectionToken(tok);
+    return `<span class="header-badge type-${type}">${esc(text)}</span>`;
+  });
+  return `<div class="header-badges">${items.join('')}</div>`;
+}
+
 /* ------------------------------------------------------------
    HEADER SUPPORT
    - {start_header} ... {end_header} block is raw & centered
    - No chord parsing in header
-   - {comment} shown as plain text
-   - {comment_box} shown in a simple gray box
-   - Blank lines are IGNORED inside header (per your choice)
+   - {comment} and {comment_box} supported
+   - {section_list: ...} → horizontal colored badges (centered)
    - Auto-header fallback if no header block present
 ------------------------------------------------------------ */
 function splitHeaderBlock(raw){
@@ -471,7 +510,6 @@ function splitHeaderBlock(raw){
   return { header:null, body:raw, hasExplicit:false };
 }
 function parseMetaFields(text){
-  // return first occurrences for auto-header
   const get = (tag)=>{
     const m = text.match(new RegExp(`\\{${tag}:\\s*(.*?)\\}`, 'i'));
     return m ? m[1].trim() : null;
@@ -486,40 +524,48 @@ function parseMetaFields(text){
     tempo: get('tempo'),
     capo: get('capo'),
     comment: get('comment'),
-    comment_box: get('comment_box')
+    comment_box: get('comment_box'),
+    section_list: get('section_list')
   };
 }
 function renderHeaderRaw(headerText, metaFallback=null){
-  let out = '<div style="text-align:center;margin-bottom:10px">';
-  const pushLine = (html)=>{ out += `<div>${html}</div>`; };
+  // Build content lines first
+  let html = '<div class="header-box"><div class="header-content">';
+  const pushLine = (s)=>{ html += `<div>${s}</div>`; };
 
-  if(headerText){ // explicit header: treat each non-empty line
+  // Local capture for section_list string
+  let sectionListStr = null;
+
+  if(headerText){
     const lines = headerText.replace(/\r/g,'').split('\n');
     for(const raw of lines){
-      const line = raw.trim(); if(!line) continue; // ignore blanks
+      const line = raw.trim();
+      if(!line) continue;
       const kv = line.match(/^\{([^:}]+):\s*(.*?)\}$/);
       if(kv){
-        const tag = kv[1].toLowerCase(), val = esc(kv[2]);
-        if(tag==='title') pushLine(`<div class="title" style="margin:0 auto">${val}</div>`);
-        else if(tag==='subtitle') pushLine(`<div class="subtitle" style="margin:4px 0">${val}</div>`);
-        else if(tag==='artist') pushLine(`<div class="meta-row">Artist: ${val}</div>`);
-        else if(tag==='album') pushLine(`<div class="meta-row">Album: ${val}</div>`);
-        else if(tag==='key' || tag==='time' || tag==='tempo' || tag==='capo') pushLine(`<div class="meta-row">${esc(tag[0].toUpperCase()+tag.slice(1))}: ${val}</div>`);
-        else if(tag==='comment') pushLine(`<div class="meta-row">${val}</div>`);
-        else if(tag==='comment_box') pushLine(`<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${val}</div>`);
-        else pushLine(esc(line));
+        const tag = kv[1].toLowerCase(), val = kv[2];
+        if(tag==='title') pushLine(`<div class="title">${esc(val)}</div>`);
+        else if(tag==='subtitle') pushLine(`<div class="subtitle">${esc(val)}</div>`);
+        else if(tag==='artist') pushLine(`<div class="meta-row">Artist: ${esc(val)}</div>`);
+        else if(tag==='album') pushLine(`<div class="meta-row">Album: ${esc(val)}</div>`);
+        else if(tag==='key' || tag==='time' || tag==='tempo' || tag==='capo'){
+          pushLine(`<div class="meta-row">${esc(tag[0].toUpperCase()+tag.slice(1))}: ${esc(val)}</div>`);
+        }else if(tag==='comment'){
+          pushLine(`<div class="meta-row">${esc(val)}</div>`);
+        }else if(tag==='comment_box'){
+          pushLine(`<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${esc(val)}</div>`);
+        }else if(tag==='section_list'){
+          sectionListStr = val;
+        }else{
+          pushLine(esc(line));
+        }
       }else{
         pushLine(esc(line));
       }
     }
-    out += '</div>';
-    return out;
-  }
-
-  // Auto-header fallback
-  if(metaFallback && (metaFallback.title || metaFallback.artist || metaFallback.key || metaFallback.time || metaFallback.tempo || metaFallback.capo || metaFallback.comment || metaFallback.comment_box)){
-    if(metaFallback.title)      pushLine(`<div class="title" style="margin:0 auto">${esc(metaFallback.title)}</div>`);
-    if(metaFallback.subtitle)   pushLine(`<div class="subtitle" style="margin:4px 0">${esc(metaFallback.subtitle)}</div>`);
+  }else if(metaFallback){
+    if(metaFallback.title)    pushLine(`<div class="title">${esc(metaFallback.title)}</div>`);
+    if(metaFallback.subtitle) pushLine(`<div class="subtitle">${esc(metaFallback.subtitle)}</div>`);
     if(metaFallback.artist || metaFallback.album){
       let line='';
       if(metaFallback.artist) line += `Artist: ${esc(metaFallback.artist)}`;
@@ -535,12 +581,16 @@ function renderHeaderRaw(headerText, metaFallback=null){
     if(extras.length) pushLine(`<div class="meta-row">${extras.join(' • ')}</div>`);
     if(metaFallback.comment)     pushLine(`<div class="meta-row">${esc(metaFallback.comment)}</div>`);
     if(metaFallback.comment_box) pushLine(`<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${esc(metaFallback.comment_box)}</div>`);
-    out += '</div>';
-    return out;
+    sectionListStr = metaFallback.section_list || null;
   }
 
-  // No header
-  return '';
+  // Close header-content and add badges row if present
+  html += '</div>'; // .header-content
+  const badges = buildHeaderBadges(sectionListStr);
+  if(badges) html += badges;
+  html += '</div>'; // .header-box
+
+  return html;
 }
 
 /* ------------------------------------------------------------
@@ -595,7 +645,6 @@ function parseChordProBody(text){
         if(!sectionOpen) openSection('Section',null);
         parts.push(`<div class="comment box">${esc(val)}</div>`);
       }
-      // ignore meta tags here; header already handled
       continue;
     }
 
@@ -634,17 +683,13 @@ function parseChordProBody(text){
    Top-level renderer
 ------------------------------------------------------------ */
 function renderAll(rawInput){
-  // Find header block (or build auto-header)
   const {header, body, hasExplicit} = splitHeaderBlock(rawInput);
   const meta = parseMetaFields(rawInput);
   const headerHtml = renderHeaderRaw(header, hasExplicit? null : meta);
-
-  // Body with musical parsing
   const bodyHtml = parseChordProBody(body);
-
-  // Assemble
   return headerHtml + bodyHtml;
 }
+
 /* ============================================================
    Transpose helpers + UI wiring
 ============================================================ */
@@ -671,34 +716,23 @@ function fillKeySelect(){
   for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k+'m'; o.textContent=k+'m'; s.appendChild(o); }
 }
 
-/* ============================================================
-   Render pipeline
-   - transpose applies ONLY to body (not the header block)
-============================================================ */
+/* Render pipeline — transpose applies ONLY to body */
 function render(){
   const raw = document.getElementById('source').value || '';
 
-  // Determine original key from meta for transpose math
   const meta = parseMetaFields(raw);
   songOriginalKey = meta.key ? meta.key.replace(/\s+/g,'') : null;
 
-  // Split header/body once
   const {header, body, hasExplicit} = splitHeaderBlock(raw);
 
-  // Compute transpose steps from current select
   const sel = document.getElementById('keySelect').value;
   transposeSteps = (sel && songOriginalKey) ? computeSemitoneDiff(songOriginalKey, sel) : 0;
 
-  // Transpose only the body (chord brackets)
   const bodyT = applyTransposeToText(body, transposeSteps);
 
-  // Build header (explicit or auto)
   const headerHtml = renderHeaderRaw(header, hasExplicit ? null : meta);
-
-  // Build body sections
   const bodyHtml = parseChordProBody(bodyT);
 
-  // Output
   document.getElementById('outputArea').innerHTML = headerHtml + bodyHtml;
 }
 
@@ -706,7 +740,6 @@ function render(){
    Buttons & Events
 ============================================================ */
 document.getElementById('render').addEventListener('click', render);
-
 document.getElementById('keySelect').addEventListener('change', render);
 
 document.getElementById('downloadCho').addEventListener('click', ()=>{
@@ -714,7 +747,6 @@ document.getElementById('downloadCho').addEventListener('click', ()=>{
   const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  // try to use title for filename
   let name='song';
   const m=text.match(/\{title:\s*(.+?)\}/i); if(m) name=m[1].trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_');
   a.download=name+'.cho';
@@ -735,7 +767,6 @@ document.getElementById('shareLink').addEventListener('click', async ()=>{
 });
 
 document.getElementById('exportPdf').addEventListener('click', ()=>{
-  // Re-render current HTML (already transposed) and print in B&W columns
   const html = document.getElementById('outputArea').innerHTML;
   const title=(document.querySelector('.title')?.textContent)||'ChordPro Song';
   const w=window.open('','_blank');
@@ -745,6 +776,8 @@ document.getElementById('exportPdf').addEventListener('click', ()=>{
     .meta-row{font-size:11px;color:#666;margin-bottom:6px}
     pre{font-family:"Courier New",Courier,monospace;font-size:16px;line-height:1.45;white-space:pre-wrap;word-break:break-word;margin:4px 0;border:none;background:none}
     .chord-strong{font-size:17px;font-weight:700}
+    .header-box{border:1px solid #666 !important;border-radius:12px;padding:12px;margin-bottom:12px;}
+    .header-badge{border-color:#333 !important;color:#000 !important;background:#fff !important;}
     .section-box{background:#fff !important;border:1px solid #666 !important;border-radius:12px;padding:18px 14px 14px 14px;margin:18px 0;position:relative;break-inside:avoid}
     .section-badge{position:absolute;top:-14px;left:14px;min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;padding:0 6px;font-size:12px;font-weight:800;border:2px solid #222 !important;color:#000 !important}
     .section-line{position:absolute;top:0;left:52px;right:12px;height:2px;background:#444 !important;border-radius:2px}
@@ -768,7 +801,6 @@ document.getElementById('toggleLargeText').addEventListener('click', ()=>{
    Init
 ============================================================ */
 fillKeySelect();
-// Load from ?song=... if present
 (function(){
   const params=new URLSearchParams(location.search);
   if(params.has('song')){

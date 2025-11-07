@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChordPro Viewer — Working Buttons + Full Tag Support</title>
+<title>ChordPro Viewer — Fixed Print Layout</title>
 <style>
   :root{
     --page-bg:#fbfbfb; --card-bg:#ffffff; --muted:#6b7280;
@@ -40,18 +40,52 @@
 
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
 
+  /* ✅ FIXED PRINT COLUMNS */
   @media print {
-    body{background:white}
-    .wrap{margin:10mm auto;padding:0}
-    .controls,.no-print{display:none!important}
-    .viewer{box-shadow:none;padding:0;border-radius:0}
-    pre{font-size:18px}
-    .chord-strong{font-size:20px}
-    .title{font-size:26px}
-    .meta-row{font-size:11px}
-    .viewer{column-count:2;column-gap:20mm;column-fill:balance;}
-    .song-meta,.section-label,pre,.chorus,.bridge,.tab,.comment{break-inside:avoid;page-break-inside:avoid;}
-    .music-block{page-break-before:auto;page-break-after:auto;page-break-inside:avoid;}
+    body {
+      background: white;
+      margin: 10mm auto;
+      color: #111;
+    }
+    .wrap {
+      margin: 0;
+      padding: 0;
+    }
+    .controls, .no-print {
+      display: none !important;
+    }
+    .viewer {
+      box-shadow: none;
+      padding: 0;
+      border-radius: 0;
+      column-count: 2;
+      column-gap: 25mm; /* more spacing between columns */
+      column-fill: auto; /* prevent overlap */
+    }
+    pre {
+      font-size: 17px;
+      line-height: 1.45;
+      white-space: pre-wrap; /* ✅ allows wrapping */
+      word-break: break-word; /* ✅ prevents overflow */
+      border: none;
+      background: none;
+      margin: 4px 0;
+    }
+    .chord-strong { font-size: 18px; }
+    .title { font-size: 26px; }
+    .meta-row { font-size: 11px; }
+    .song-meta, .section-label, pre, .chorus, .bridge, .tab, .comment {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .music-block {
+      page-break-before: auto;
+      page-break-after: auto;
+      page-break-inside: avoid;
+    }
+    @page {
+      margin: 15mm;
+    }
   }
 </style>
 </head>
@@ -59,7 +93,7 @@
 <div class="wrap">
   <header>
     <h1>ChordPro Viewer</h1>
-    <p>Full ChordPro tag support with readable layout and working export buttons.</p>
+    <p>Full ChordPro tag support, larger chords/lyrics, and clean two-column print layout.</p>
   </header>
 
   <div class="card">
@@ -201,14 +235,14 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
  const content=document.getElementById('outputArea').innerHTML;
  const title=(document.querySelector('.title')&&document.querySelector('.title').textContent)||'ChordPro Song';
  const w=window.open('','_blank');
- const css=`body{font-family:Georgia,"Times New Roman",serif;margin:20mm;color:#111;background:#fff;}
+ const css=`body{font-family:Georgia,"Times New Roman",serif;margin:15mm;color:#111;background:#fff;}
  .title{font-size:26px;font-weight:700;margin-bottom:6px}
  .meta-row{font-size:11px;color:#666;margin-bottom:6px}
- pre{font-family:"Courier New",Courier,monospace;font-size:18px;line-height:1.6;margin:6px 0;}
- .chord-strong{font-size:20px;font-weight:700}
- .viewer{column-count:2;column-gap:20mm;column-fill:balance;}
+ pre{font-family:"Courier New",Courier,monospace;font-size:17px;line-height:1.45;white-space:pre-wrap;word-break:break-word;margin:4px 0;}
+ .chord-strong{font-size:18px;font-weight:700}
+ .viewer{column-count:2;column-gap:25mm;column-fill:auto;}
  .song-meta,.section-label,pre,.chorus,.bridge,.tab,.comment{break-inside:avoid;page-break-inside:avoid;}
- @media print{body{margin:12mm}pre{font-size:17px}}`;
+ @media print{body{margin:12mm}pre{font-size:16px}}`;
  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${css}</style></head><body><div class="viewer">${content}</div></body></html>`);
  w.document.close(); w.focus(); setTimeout(()=>{w.print();},250);
 });

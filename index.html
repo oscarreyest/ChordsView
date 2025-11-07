@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChordPro Viewer — Unified Screen & Print (Auto-Fit Letter)</title>
+<title>ChordPro Viewer — Unified Screen/Print (Auto-Fit Letter)</title>
 <style>
   :root{
-    /* Base palette */
+    /* Colors */
     --page-bg:#f7f8fa; --card-bg:#ffffff; --muted:#6b7280; --accent:#1f6feb;
 
-    /* Screen tints for sections */
+    /* Section tints (screen) */
     --generic-bg:#f8f9fa;
     --verse-bg:#f3fdf3;
     --chorus-bg:#eef6ff;
@@ -28,18 +28,18 @@
     --outro-ac:#b39ddb;
 
     /* Typography (auto-scaled by JS) */
-    --lyric-size:16px;     /* normal target */
-    --chord-size:17px;     /* normal target */
-    --pre-line:1.6;        /* line height for <pre> rows */
-    --section-title:16px;  /* section title text */
-    --meta-size:14px;      /* meta rows in header */
-    --badge-font:12px;     /* badge number/letter */
-    --title-size:32px;     /* song title */
+    --lyric-size:16px;     /* normal */
+    --chord-size:17px;     /* normal */
+    --pre-line:1.6;        /* <pre> line-height */
+    --section-title:16px;
+    --meta-size:14px;
+    --badge-font:12px;
+    --title-size:32px;
     --subtitle-size:18px;
 
     /* Layout */
-    --viewer-pad:24px;     /* viewer padding */
-    --column-gap:22mm;     /* gap when two columns */
+    --viewer-pad:24px;
+    --column-gap:22mm;
     --header-gap:10px;
     --pre-margin:8px;
   }
@@ -65,7 +65,7 @@
   .subtitle{font-size:var(--subtitle-size);font-style:italic;color:var(--muted);margin:0 0 6px 0}
   .meta-row{font-size:var(--meta-size);color:var(--muted);font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif}
 
-  /* Header box & header badges (use same badge style/colors as sections) */
+  /* Header box & header badges (same style/colors as sections) */
   .header-box{border:1px solid #dce2ea;border-radius:12px;padding:14px 16px;margin-bottom:12px}
   .header-content{text-align:center}
   .header-badges{
@@ -112,7 +112,7 @@
   .section-box.interlude .section-line,.section-box.interlude .section-badge{border-color:var(--interlude-ac);background:none}
   .section-box.outro .section-line,.section-box.outro .section-badge{border-color:var(--outro-ac);background:none}
 
-  /* Lyrics + chords (no wrapping inside a line to preserve alignment) */
+  /* Lyrics + chords (keep alignment) */
   pre{
     font-family:"Courier New", Courier, monospace;
     white-space:pre;          /* keep alignment */
@@ -125,7 +125,7 @@
   }
   .chord-strong{font-weight:700;font-size:var(--chord-size)}
 
-  /* Two-column class (used by auto-fit) */
+  /* Two-column mode (added/removed by JS auto-fit) */
   .viewer.two-col{column-count:2; column-gap:var(--column-gap); column-fill:auto;}
   .viewer.two-col .section-box,
   .viewer.two-col pre,
@@ -136,11 +136,8 @@
 
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
 
-  /* Print: keep colors and layout identical; only margins and shadows change */
+  /* Print: we print from a dedicated window that includes only .viewer */
   @media print{
-    body{margin:12mm;background:#fff}
-    .controls,.no-print{display:none !important}
-    .viewer{box-shadow:none; padding:0} /* same look; columns controlled by .two-col */
     @page{size:Letter; margin:12mm;}
   }
 </style>
@@ -440,7 +437,7 @@ function parseChordProBody(text){
       if(['verse','verso','estrofa'].includes(t)){ closeSection(); blockType=null; openSection('Verse','verse'); continue; }
       if(['intro'].includes(t)){ closeSection(); blockType=null; openSection('Intro','intro'); continue; }
       if(['interlude'].includes(t)){ closeSection(); blockType=null; openSection('Interlude','interlude'); continue; }
-      if(['outro'].includes(t)){ closeSection(); blockType=null; openSection('Outro','outro'); continue; }
+      if(['outro'].includes(t)){ close Section(); blockType=null; openSection('Outro','outro'); continue; }
       if(['prechorus','pre_chorus'].includes(t)){ closeSection(); blockType=null; openSection('Pre-Chorus','prechorus'); continue; }
       if(['start_of_tab','start_tab'].includes(t)){ if(!sectionOpen) openSection('Tab','generic'); blockType='tab'; continue; }
       if(['end_of_chorus','eoc','end_chorus','end_of_bridge','end_bridge','end_of_tab','end_tab','end_of_comment','end_comment'].includes(t)){ blockType=null; closeSection(); continue; }
@@ -468,7 +465,7 @@ function fillKeySelect(){
   for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k+'m'; o.textContent=k+'m'; s.appendChild(o); }
 }
 
-/* ========== Auto-Fit Engine (Letter, 1–2 col, scaling) ========== */
+/* ========== Auto-Fit Engine (Option B: Auto 1→2 col; min sizes 13/14) ========== */
 function setVars({lyric, chord, line, sectionTitle, meta, badge, title, subtitle, viewerPad}){
   const v=document.getElementById('outputArea');
   v.style.setProperty('--lyric-size', lyric+'px');
@@ -482,36 +479,35 @@ function setVars({lyric, chord, line, sectionTitle, meta, badge, title, subtitle
   v.style.setProperty('--viewer-pad', viewerPad+'px');
 }
 
-function measureFitsOneScreen(){
-  // Available height: viewport minus a small buffer for outer margins
+function measureFitsViewport(pct=0.92){
   const v=document.getElementById('outputArea');
-  const avail = window.innerHeight * 0.90;
-  return v.scrollHeight <= avail;
+  const available = window.innerHeight * pct;
+  return v.scrollHeight <= available;
 }
 
 function applyColumns(twoCols){
   const v=document.getElementById('outputArea');
-  if(twoCols) v.classList.add('two-col'); else v.classList.remove('two-col');
+  twoCols ? v.classList.add('two-col') : v.classList.remove('two-col');
 }
 
 function autoFit(){
-  // Start from normal sizes
+  // Start: normal sizes
   applyColumns(false);
   setVars({lyric:16, chord:17, line:1.6, sectionTitle:16, meta:14, badge:12, title:32, subtitle:18, viewerPad:24});
 
-  // Quick check
-  if(measureFitsOneScreen()) return;
+  // If fits in 1 col → done
+  if(measureFitsViewport()) return;
 
-  // Try 2 columns
+  // Try 2 cols
   applyColumns(true);
-  if(measureFitsOneScreen()) return;
+  if(measureFitsViewport()) return;
 
-  // Downscale gradually, but keep chord readability
+  // Downscale gently to min (Option B: lyrics>=13, chords>=14)
   let lyric=16, chord=17, line=1.58, sectionTitle=15, meta=13, badge=12, title=30, subtitle=17, viewerPad=20;
-  for(let step=0; step<6; step++){
+  for(let step=0; step<8; step++){
     lyric=Math.max(13, lyric-1);
     chord=Math.max(14, chord-1);
-    line =Math.max(1.45, (line-0.02));
+    line =Math.max(1.46, (line-0.02));
     sectionTitle=Math.max(14, sectionTitle-1);
     meta=Math.max(12, meta-1);
     badge=Math.max(11, badge-1);
@@ -519,9 +515,9 @@ function autoFit(){
     subtitle=Math.max(16, subtitle-1);
     viewerPad=Math.max(12, viewerPad-2);
     setVars({lyric, chord, line, sectionTitle, meta, badge, title, subtitle, viewerPad});
-    if(measureFitsOneScreen()) return;
+    if(measureFitsViewport()) return;
   }
-  // If still overflowing, we've reached minimum safe sizes; allow natural overflow (page 2).
+  // If still long → it will overflow (rare, very long songs).
 }
 
 /* ================== Render pipeline ================== */
@@ -565,60 +561,115 @@ document.getElementById('shareLink').addEventListener('click',async()=>{
   try{ await navigator.clipboard.writeText(url); alert('Link copied to clipboard'); }
   catch(e){ prompt('Copy this link:',url); }
 });
-document.getElementById('exportPdf').addEventListener('click', () => {
 
-  const content = document.getElementById('outputArea').innerHTML;
+/* ========== Export PDF / Print — ONLY the rendered viewer, with auto-fit in print window ========== */
+document.getElementById('exportPdf').addEventListener('click',()=>{
+  const viewer = document.getElementById('outputArea');
+  const content = viewer.innerHTML;
 
-  // Extract <style> content inside <head>
-  const styles = Array.from(document.querySelectorAll('style'))
-    .map(style => style.outerHTML)
-    .join('\n');
+  // Collect style tags from the main document so print window looks identical
+  const styles = Array.from(document.querySelectorAll('style')).map(s => s.outerHTML).join('\n');
 
-  const printWindow = window.open("", "_blank", "width=900,height=1100");
+  // Snapshot current CSS variables and classes from .viewer
+  const viewerClass = viewer.className;                 // may contain 'two-col'
+  const inlineVars  = viewer.getAttribute('style')||''; // contains --lyric-size etc.
 
-  printWindow.document.write(`
+  const w = window.open('', '_blank', 'width=900,height=1100');
+
+  w.document.write(`
     <!doctype html>
     <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Print Song</title>
-      ${styles}
+      <head>
+        <meta charset="utf-8">
+        <title>Print Song</title>
+        ${styles}
+        <style>
+          body{margin:0;background:#fff;}
+          .print-wrap{margin:0;}
+          @page{size:Letter; margin:12mm;}
+          /* Ensure identical look; .viewer rules already included above */
+        </style>
+      </head>
+      <body>
+        <div class="print-wrap">
+          <div id="printViewer" class="${viewerClass}" style="${inlineVars}">
+            ${content}
+          </div>
+        </div>
 
-      <style>
-        /* Force print window background + padding */
-        body {
-          margin: 0;
-          background: white;
-        }
-        @page {
-          size: Letter;
-          margin: 12mm;
-        }
+        <script>
+          // Auto-fit inside print window too (Option B: auto 1→2 columns; min sizes 13/14)
+          function setVar(el,name,val){ el.style.setProperty(name,val); }
+          function measureFits(pct){
+            const el = document.getElementById('printViewer');
+            const available = window.innerHeight * (pct||0.92);
+            return el.scrollHeight <= available;
+          }
+          function toggleCols(on){
+            const v=document.getElementById('printViewer');
+            on ? v.classList.add('two-col') : v.classList.remove('two-col');
+          }
+          function getVarPx(el,name){ const cs=getComputedStyle(el).getPropertyValue(name).trim(); return parseFloat(cs); }
 
-        /* FORCE viewer into the same format you use on screen */
-        .viewer {
-          padding: var(--viewer-pad);
-          background: #fff;
-        }
-      </style>
+          function autoFitPrint(){
+            const v=document.getElementById('printViewer');
 
-    </head>
-    <body>
-      <div class="viewer">
-        ${content}
-      </div>
-    </body>
+            // Start from whatever vars came from the main window (keeps on-screen auto-fit),
+            // but we still try to refine for the print window viewport.
+            toggleCols(false);
+            if(measureFits(0.96)) return;
+
+            toggleCols(true);
+            if(measureFits(0.96)) return;
+
+            // Read current values, then scale down to min (lyrics>=13, chords>=14)
+            let lyric = Math.max(13, getVarPx(v,'--lyric-size') || 16);
+            let chord = Math.max(14, getVarPx(v,'--chord-size') || 17);
+            let line  = Math.max(1.46, parseFloat(getComputedStyle(v).getPropertyValue('--pre-line')) || 1.6);
+            let sectionTitle = Math.max(14, getVarPx(v,'--section-title') || 16);
+            let meta  = Math.max(12, getVarPx(v,'--meta-size') || 14);
+            let badge = Math.max(11, getVarPx(v,'--badge-font') || 12);
+            let title = Math.max(26, getVarPx(v,'--title-size') || 32);
+            let subtitle = Math.max(16, getVarPx(v,'--subtitle-size') || 18);
+            let pad = Math.max(12, getVarPx(v,'--viewer-pad') || 24);
+
+            for(let i=0;i<8;i++){
+              if(measureFits(0.96)) break;
+              lyric = Math.max(13, lyric-1);
+              chord = Math.max(14, chord-1);
+              line  = Math.max(1.46, line-0.02);
+              sectionTitle = Math.max(14, sectionTitle-1);
+              meta  = Math.max(12, meta-1);
+              badge = Math.max(11, badge-1);
+              title = Math.max(26, title-1);
+              subtitle = Math.max(16, subtitle-1);
+              pad = Math.max(12, pad-2);
+
+              setVar(v,'--lyric-size', lyric+'px');
+              setVar(v,'--chord-size', chord+'px');
+              setVar(v,'--pre-line', line);
+              setVar(v,'--section-title', sectionTitle+'px');
+              setVar(v,'--meta-size', meta+'px');
+              setVar(v,'--badge-font', badge+'px');
+              setVar(v,'--title-size', title+'px');
+              setVar(v,'--subtitle-size', subtitle+'px');
+              setVar(v,'--viewer-pad', pad+'px');
+            }
+          }
+
+          window.addEventListener('load', ()=>{
+            // Give layout a tick, then auto-fit and print
+            setTimeout(()=>{
+              autoFitPrint();
+              setTimeout(()=>{ window.print(); window.close(); }, 150);
+            }, 50);
+          });
+        <\/script>
+      </body>
     </html>
   `);
 
-  printWindow.document.close();
-  printWindow.focus();
-
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 250);
-
+  w.document.close();
 });
 
 /* Init key options + optional ?song= */

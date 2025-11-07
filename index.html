@@ -565,9 +565,60 @@ document.getElementById('shareLink').addEventListener('click',async()=>{
   try{ await navigator.clipboard.writeText(url); alert('Link copied to clipboard'); }
   catch(e){ prompt('Copy this link:',url); }
 });
-document.getElementById('exportPdf').addEventListener('click',()=>{
-  // Print uses the same layout/colors; browser print → Save as PDF
-  window.print();
+document.getElementById('exportPdf').addEventListener('click', () => {
+
+  const content = document.getElementById('outputArea').innerHTML;
+
+  // Extract <style> content inside <head>
+  const styles = Array.from(document.querySelectorAll('style'))
+    .map(style => style.outerHTML)
+    .join('\n');
+
+  const printWindow = window.open("", "_blank", "width=900,height=1100");
+
+  printWindow.document.write(`
+    <!doctype html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Print Song</title>
+      ${styles}
+
+      <style>
+        /* Force print window background + padding */
+        body {
+          margin: 0;
+          background: white;
+        }
+        @page {
+          size: Letter;
+          margin: 12mm;
+        }
+
+        /* FORCE viewer into the same format you use on screen */
+        .viewer {
+          padding: var(--viewer-pad);
+          background: #fff;
+        }
+      </style>
+
+    </head>
+    <body>
+      <div class="viewer">
+        ${content}
+      </div>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 250);
+
 });
 
 /* Init key options + optional ?song= */

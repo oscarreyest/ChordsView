@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChordPro Viewer — Final Build</title>
+<title>ChordPro Viewer — Final Build (section_list + auto key in comment_box)</title>
 
 <style>
 /* ---------------------------------------------------------
@@ -167,7 +167,7 @@ select#keySelect{
 }
 .header-badges{
   display:flex;
-  justify-content:center;  /* alignment A (centered) */
+  justify-content:center;  /* centered */
   align-items:center;
   flex-wrap:wrap;
   gap:10px;
@@ -186,7 +186,7 @@ select#keySelect{
 
 /* Color mapping for header badges (same as section badges) */
 .header-badge.type-verse{       border-color:var(--verse-ac); }
-.header-badge.type-prechorus{   border-color:var(--chorus-ac); } /* using chorus-like blue for Pc line? optional tweak */
+.header-badge.type-prechorus{   border-color:var(--chorus-ac); }
 .header-badge.type-chorus{      border-color:var(--chorus-ac); }
 .header-badge.type-bridge{      border-color:var(--bridge-ac); }
 .header-badge.type-intro{       border-color:var(--intro-ac); }
@@ -331,26 +331,51 @@ pre{
   <div class="wrap">
     <header>
       <h1>ChordPro Viewer</h1>
-      <p>Final build: header box with section list badges, section boxes, transpose, large text, PDF export.</p>
+      <p>Header section_list badges + section boxes + transpose + auto key update in comment_box.</p>
     </header>
 
     <div class="card">
       <label for="source" style="display:block;font-weight:600;margin-bottom:8px">ChordPro source</label>
-      <textarea id="source" placeholder="{title: Song}
-{artist: Someone}
-{key: C}
+      <textarea id="source" placeholder="{start_header}
+{title: Tú Eres Digno de Gloria}
+{artist: ICZ Worship}
+{key: Am}
 {time: 4/4}
-{tempo: 120}
-
-{start_header}
-{title: My Song}
-{artist: The Band}
-{comment_box: For ministry use only}
-{section_list: I, V1, C, B}
+{tempo: 126}
+{comment_box: Key changed to: [Am]}
+{section_list: I, V1, C, B }
 {end_header}
 
-{comment: Intro}
-[C]Hello [G]world"></textarea>
+{comment: Intro} 		
+[F]   [G]   [F]   [G]
+{comment: Verso}		                 
+Hoy te alabamos Señ[F]or  [G]
+Y declaramos que [F]Tú eres nuestro Di[G]os
+Tu eres el Dios del am[F]or  [G] 
+Y ya no somos escl[F]avos del tem[G]or
+{comment_italic: Entra Bateria}		                 
+Hoy te adoramos Señ[F]or  [G]
+Y te cantamos con nu[F]estro coraz[G]ón
+Te damos todo el hon[F]or   [G]
+Sobre el cielo y la ti[F]erra
+Tu eres Señ[G]or
+{start_of_chorus}
+Tu eres digno de gl[C]oria   [G]
+Sobre toda la ti[Am]erra Tú eres Di[F]os
+Tu eres digno de r[C]ecibir
+Toda ad[G]oración
+Todo [Am]el honor sea a [F]Tí
+{end_of_chorus}
+{comment: Interludio}	
+[F]  [G]  [F]  [G]
+{comment: Interludio 2}	
+[Am]   [F]  [C]  [G]
+{start_of_bridge}		
+[Am]Eres digno
+[F]Eres santo
+[C]Eres Rey
+De [G]toda creación
+{end_of_bridge}"></textarea>
 
       <div class="controls no-print">
         <button id="render" class="btn primary">Render</button>
@@ -368,7 +393,8 @@ pre{
       </div>
 
       <div class="hint" style="font-size:13px;color:var(--muted);margin-top:6px;font-family:system-ui,sans-serif">
-        Header block: <code>{start_header} ... {end_header}</code> (raw). Add <code>{section_list: I, V1, C, B}</code> to show header badges.
+        Use <code>{start_header}...{end_header}</code> for a centered header. Add <code>{section_list: I, V1, C, B}</code> to show header badges.<br>
+        <strong>Auto key update:</strong> Write <code>{comment_box: Key changed to: [Am]}</code> — it will show the current key (Am in original, or selected key after transpose).
       </div>
     </div>
 
@@ -403,6 +429,22 @@ function transposeChordToken(token, steps){
 }
 function applyTransposeToText(text, steps){
   return text.replace(/\[([^\]]+)\]/g,(_,ch)=>'['+ch.split(/\s+/).filter(Boolean).map(t=>transposeChordToken(t,steps)).join(' ')+']');
+}
+
+/* Determine what key to display inside comment_box [ ... ] */
+function getDisplayKeyForCommentBox(){
+  // If a target key is selected, show that. Else show original key.
+  const sel = document.getElementById('keySelect')?.value || '';
+  if(sel && songOriginalKey) return sel;         // show selected key (e.g., "C" or "Am")
+  return songOriginalKey || '';                  // fallback to original key string
+}
+
+/* Replace only the FIRST bracketed chord in a comment_box with the display key */
+function replaceSingleBracketWithDisplayKey(text){
+  const displayKey = getDisplayKeyForCommentBox();
+  if(!displayKey) return text;
+  // Replace first [ ... ] only
+  return text.replace(/\[[^\]]*\]/, `[${displayKey}]`);
 }
 
 /* Two-row chord/lyric renderer */
@@ -475,7 +517,6 @@ function mapSectionToken(tokRaw){
   if(t==='IT' || t==='INT' || t==='INTERLUDE') return {type:'interlude', text:'It'};
   if(t==='O' || t==='OUTRO') return {type:'outro', text:'O'};
 
-  // Fallback: try to infer Verse number like V1
   const m = t.match(/^V(\d+)$/); if(m) return {type:'verse', text:'V'+m[1]};
   return {type:'generic', text:t};
 }
@@ -493,8 +534,7 @@ function buildHeaderBadges(sectionListStr){
 /* ------------------------------------------------------------
    HEADER SUPPORT
    - {start_header} ... {end_header} block is raw & centered
-   - No chord parsing in header
-   - {comment} and {comment_box} supported
+   - No chord parsing in header (except comment_box key injection)
    - {section_list: ...} → horizontal colored badges (centered)
    - Auto-header fallback if no header block present
 ------------------------------------------------------------ */
@@ -529,11 +569,9 @@ function parseMetaFields(text){
   };
 }
 function renderHeaderRaw(headerText, metaFallback=null){
-  // Build content lines first
   let html = '<div class="header-box"><div class="header-content">';
   const pushLine = (s)=>{ html += `<div>${s}</div>`; };
 
-  // Local capture for section_list string
   let sectionListStr = null;
 
   if(headerText){
@@ -553,7 +591,9 @@ function renderHeaderRaw(headerText, metaFallback=null){
         }else if(tag==='comment'){
           pushLine(`<div class="meta-row">${esc(val)}</div>`);
         }else if(tag==='comment_box'){
-          pushLine(`<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${esc(val)}</div>`);
+          // ✅ auto-replace first [ ... ] with display key
+          const updated = replaceSingleBracketWithDisplayKey(val);
+          pushLine(`<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${esc(updated)}</div>`);
         }else if(tag==='section_list'){
           sectionListStr = val;
         }else{
@@ -580,11 +620,13 @@ function renderHeaderRaw(headerText, metaFallback=null){
     if(metaFallback.capo)  extras.push('Capo: '+esc(metaFallback.capo));
     if(extras.length) pushLine(`<div class="meta-row">${extras.join(' • ')}</div>`);
     if(metaFallback.comment)     pushLine(`<div class="meta-row">${esc(metaFallback.comment)}</div>`);
-    if(metaFallback.comment_box) pushLine(`<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${esc(metaFallback.comment_box)}</div>`);
+    if(metaFallback.comment_box){
+      const updated = replaceSingleBracketWithDisplayKey(metaFallback.comment_box);
+      pushLine(`<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${esc(updated)}</div>`);
+    }
     sectionListStr = metaFallback.section_list || null;
   }
 
-  // Close header-content and add badges row if present
   html += '</div>'; // .header-content
   const badges = buildHeaderBadges(sectionListStr);
   if(badges) html += badges;
@@ -643,7 +685,9 @@ function parseChordProBody(text){
         parts.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`);
       }else if(tag==='comment_box'){
         if(!sectionOpen) openSection('Section',null);
-        parts.push(`<div class="comment box">${esc(val)}</div>`);
+        // ✅ auto-replace first bracket with display key
+        const updated = replaceSingleBracketWithDisplayKey(val);
+        parts.push(`<div class="comment box">${esc(updated)}</div>`);
       }
       continue;
     }
@@ -680,19 +724,8 @@ function parseChordProBody(text){
 }
 
 /* ------------------------------------------------------------
-   Top-level renderer
+   Transpose + UI wiring
 ------------------------------------------------------------ */
-function renderAll(rawInput){
-  const {header, body, hasExplicit} = splitHeaderBlock(rawInput);
-  const meta = parseMetaFields(rawInput);
-  const headerHtml = renderHeaderRaw(header, hasExplicit? null : meta);
-  const bodyHtml = parseChordProBody(body);
-  return headerHtml + bodyHtml;
-}
-
-/* ============================================================
-   Transpose helpers + UI wiring
-============================================================ */
 function normalizeKey(k){
   if(!k) return null;
   const m = k.trim().match(/^([A-G])([#b]?)(m?)$/i);
@@ -716,7 +749,7 @@ function fillKeySelect(){
   for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k+'m'; o.textContent=k+'m'; s.appendChild(o); }
 }
 
-/* Render pipeline — transpose applies ONLY to body */
+/* Render pipeline — transpose applies ONLY to body; header gets key injection in comment_box */
 function render(){
   const raw = document.getElementById('source').value || '';
 
@@ -800,6 +833,30 @@ document.getElementById('toggleLargeText').addEventListener('click', ()=>{
 /* ============================================================
    Init
 ============================================================ */
+function normalizeKey(k){
+  if(!k) return null;
+  const m = k.trim().match(/^([A-G])([#b]?)(m?)$/i);
+  if(!m) return null;
+  let root=m[1].toUpperCase(), acc=m[2]||'', min=m[3]?'m':'';
+  let full=root+acc;
+  if(FLAT_EQ[full]) full=FLAT_EQ[full];
+  return full+min;
+}
+function computeSemitoneDiff(a,b){
+  const nf=normalizeKey(a), nt=normalizeKey(b);
+  if(!nf||!nt) return 0;
+  const i1=NOTES.indexOf(nf.replace(/m$/,'')), i2=NOTES.indexOf(nt.replace(/m$/,''));
+  let d=i2-i1; if(d>6)d-=12; if(d<-6)d+=12; return d;
+}
+
+function fillKeySelect(){
+  const s=document.getElementById('keySelect');
+  s.innerHTML='<option value="">(original)</option>';
+  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k;   o.textContent=k;   s.appendChild(o); }
+  const sep=document.createElement('option'); sep.disabled=true; sep.textContent='── minor keys ──'; s.appendChild(sep);
+  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k+'m'; o.textContent=k+'m'; s.appendChild(o); }
+}
+
 fillKeySelect();
 (function(){
   const params=new URLSearchParams(location.search);

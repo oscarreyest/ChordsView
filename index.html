@@ -3,18 +3,32 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChordPro Viewer — Section Boxes + Large Text Toggle</title>
+<title>ChordPro Viewer — Badges + Colored Lines + Large Text</title>
 <style>
   :root{
     --page-bg:#fbfbfb; --card-bg:#ffffff; --muted:#6b7280;
     --accent:#1f6feb; --accent-quiet:#e6f0ff;
-    /* box colors (screen only) */
-    --box-generic-bg:#f8f9fa;
-    --box-verse-bg:#f3fdf3;
-    --box-chorus-bg:#eef6ff;
-    --box-bridge-bg:#fffbea;
-    --box-intro-bg:#f9f5ff;
+
+    /* Screen colors for section families (light tints) */
     --box-border:#e3e8ef;
+    --generic-bg:#f8f9fa;
+    --verse-bg:#f3fdf3;
+    --chorus-bg:#eef6ff;
+    --bridge-bg:#fffbea;
+    --intro-bg:#f9f5ff;
+    --prechorus-bg:#fff4e6;     /* light orange */
+    --interlude-bg:#f9f5ff;
+    --outro-bg:#f9f5ff;
+
+    /* Accent (badge outline + line) */
+    --generic-ac:#cfd8dc;
+    --verse-ac:#81c784;         /* green */
+    --chorus-ac:#64b5f6;        /* blue */
+    --bridge-ac:#fff176;        /* yellow */
+    --intro-ac:#b39ddb;         /* purple */
+    --prechorus-ac:#ffb74d;     /* orange */
+    --interlude-ac:#b39ddb;     /* purple */
+    --outro-ac:#b39ddb;         /* purple */
   }
 
   html,body{height:100%;margin:0;background:var(--page-bg);font-family:Georgia,"Times New Roman",serif;color:#111}
@@ -57,34 +71,80 @@
     font-size:17px;          /* ✅ Normal: Chords 17px */
   }
 
-  /* Comments */
+  /* Comments (inline, not the section title) */
   .comment{color:var(--muted);font-style:italic;margin:6px 0;padding-left:6px;border-left:2px solid #f0f0f0}
   .comment.box{border-left:4px solid #ccc;background:#f8f8f8;padding:8px;border-radius:4px;font-style:normal;color:#333}
 
   /* Section boxes */
   .section-box{
+    position:relative;
     border:1px solid var(--box-border);
-    border-radius:10px;
-    padding:10px 14px;
-    margin:14px 0;
+    border-radius:12px;
+    padding:18px 14px 14px 14px;
+    margin:18px 0;
     page-break-inside:avoid;
   }
+  /* Background tints per type (screen) */
+  .section-box.generic  { background:var(--generic-bg); }
+  .section-box.verse    { background:var(--verse-bg); }
+  .section-box.chorus   { background:var(--chorus-bg); }
+  .section-box.bridge   { background:var(--bridge-bg); }
+  .section-box.intro    { background:var(--intro-bg); }
+  .section-box.prechorus{ background:var(--prechorus-bg); }
+  .section-box.interlude{ background:var(--interlude-bg); }
+  .section-box.outro    { background:var(--outro-bg); }
+
+  /* Section title text */
   .section-title{
     font-weight:700;
     color:#1f6feb;
-    margin-bottom:6px;
+    margin:8px 0 6px 0;
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   }
-  .box-generic{ background:var(--box-generic-bg); }
-  .box-verse{ background:var(--box-verse-bg); }
-  .box-chorus{ background:var(--box-chorus-bg); }
-  .box-bridge{ background:var(--box-bridge-bg); }
-  .box-intro{ background:var(--box-intro-bg); }
 
+  /* Section badge (inside top-left) */
+  .section-badge{
+    position:absolute;
+    top:-14px; left:14px;
+    min-width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff;
+    border-radius:50%;
+    padding:0 6px;
+    font-size:12px;
+    font-weight:800;
+    border:2px solid var(--generic-ac);
+    color:#111;
+  }
+  /* Section line (colored, matching family) */
+  .section-line{
+    position:absolute;
+    top:0; left:52px; right:12px;
+    height:2px;
+    background:var(--generic-ac);
+    border-radius:2px;
+  }
+
+  /* Color the badge outline + line by family */
+  .section-box.verse     .section-badge, .section-box.verse     .section-line { border-color: var(--verse-ac);     background:transparent; }
+  .section-box.verse     .section-line { background: var(--verse-ac); }
+  .section-box.chorus    .section-badge, .section-box.chorus    .section-line { border-color: var(--chorus-ac);    background:transparent; }
+  .section-box.chorus    .section-line { background: var(--chorus-ac); }
+  .section-box.bridge    .section-badge, .section-box.bridge    .section-line { border-color: var(--bridge-ac);    background:transparent; }
+  .section-box.bridge    .section-line { background: var(--bridge-ac); }
+  .section-box.intro     .section-badge, .section-box.intro     .section-line { border-color: var(--intro-ac);     background:transparent; }
+  .section-box.intro     .section-line { background: var(--intro-ac); }
+  .section-box.prechorus .section-badge, .section-box.prechorus .section-line { border-color: var(--prechorus-ac); background:transparent; }
+  .section-box.prechorus .section-line { background: var(--prechorus-ac); }
+  .section-box.interlude .section-badge, .section-box.interlude .section-line { border-color: var(--interlude-ac); background:transparent; }
+  .section-box.interlude .section-line { background: var(--interlude-ac); }
+  .section-box.outro     .section-badge, .section-box.outro     .section-line { border-color: var(--outro-ac);     background:transparent; }
+  .section-box.outro     .section-line { background: var(--outro-ac); }
+
+  /* Footer */
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
 
   /* ---------- Large Text toggle (instant) ---------- */
-  /* Adds class .large-text to .viewer for increased sizes */
   .viewer.large-text{ background:#fdfbf7; }
   .viewer.large-text pre{
     font-size:20px !important;    /* ✅ Large Text: Lyrics 20px */
@@ -103,12 +163,11 @@
     .viewer {
       box-shadow:none; padding:0; border-radius:0;
       column-count:2; column-gap:25mm; column-fill:auto;
-      background:#fff !important;            /* B&W */
+      background:#fff !important;  /* B&W */
     }
-    .section-box{
-      background:#fff !important;
-      border:1px solid #888 !important;
-    }
+    .section-box{ background:#fff !important; border:1px solid #888 !important; }
+    .section-badge{ border-color:#666 !important; background:#fff !important; color:#000 !important; }
+    .section-line{ background:#666 !important; }
     .section-title{ color:#000 !important; }
     pre{
       font-size:17px; line-height:1.45;
@@ -127,7 +186,7 @@
   <div class="wrap">
     <header>
       <h1>ChordPro Viewer</h1>
-      <p>Section boxes (color on screen, B&W on paper), transpose, share, export — with instant “Large Text” toggle.</p>
+      <p>Badges + colored lines (screen), B&amp;W print, Large Text toggle, transpose, share, export.</p>
     </header>
 
     <div class="card">
@@ -153,7 +212,7 @@
         </div>
       </div>
       <div class="hint" style="font-size:13px;color:var(--muted);margin-top:6px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
-        Tip: “Large Text” is a temporary on-screen view (resets on refresh). Print/PDF uses a compact, B&W two-column layout automatically.
+        Editor overrides: {no_badge}, {no_line}, {badge: Pc}, {plain_section}. “Large Text” is on-screen only.
       </div>
     </div>
 
@@ -203,37 +262,105 @@ function renderLineTwoRow(l){
 }
 
 /* ============================================================
-   Section box utilities
+   Section classification + badge extraction
 ============================================================ */
-function classifySection(title, tokenType=null){
-  if(tokenType==='chorus' || /(chorus|coro|estribillo)/i.test(title||'')) return {cls:'box-chorus',label:title||'Chorus'};
-  if(tokenType==='bridge' || /(bridge|puente)/i.test(title||'')) return {cls:'box-bridge',label:title||'Bridge'};
-  if(tokenType==='verse'  || /(verse|verso|estrofa)/i.test(title||'')) return {cls:'box-verse', label:title||'Verse'};
-  if(/(intro|interludio|interlude|outro)/i.test(title||''))            return {cls:'box-intro', label:title||'Intro'};
-  return {cls:'box-generic', label:title||'Section'};
+function classifySection(labelGuess, tokenType=null){
+  const t=(labelGuess||'').toLowerCase();
+  // Explicit tokenType has priority
+  if(tokenType==='chorus')    return {type:'chorus',    title: labelGuess||'Chorus'};
+  if(tokenType==='bridge')    return {type:'bridge',    title: labelGuess||'Bridge'};
+  if(tokenType==='verse')     return {type:'verse',     title: labelGuess||'Verse'};
+  if(tokenType==='intro')     return {type:'intro',     title: labelGuess||'Intro'};
+  if(tokenType==='prechorus') return {type:'prechorus', title: labelGuess||'Pre-Chorus'};
+  if(tokenType==='interlude') return {type:'interlude', title: labelGuess||'Interlude'};
+  if(tokenType==='outro')     return {type:'outro',     title: labelGuess||'Outro'};
+
+  // Infer from text (English/Spanish)
+  if(/(pre[\s-]?chor(us|o)|pre\s*coro)/i.test(t))   return {type:'prechorus', title: labelGuess||'Pre-Chorus'};
+  if(/(chorus|coro|estribillo)/i.test(t))           return {type:'chorus',    title: labelGuess||'Chorus'};
+  if(/(bridge|puente)/i.test(t))                    return {type:'bridge',    title: labelGuess||'Bridge'};
+  if(/(verse|verso|estrofa)/i.test(t))              return {type:'verse',     title: labelGuess||'Verse'};
+  if(/(intro)/i.test(t))                            return {type:'intro',     title: labelGuess||'Intro'};
+  if(/(interlude|interludio)/i.test(t))             return {type:'interlude', title: labelGuess||'Interlude'};
+  if(/(outro|final)/i.test(t))                      return {type:'outro',     title: labelGuess||'Outro'};
+  if(/(refrain|refr[aá]n)/i.test(t))                return {type:'generic',   title: labelGuess||'Refrain'};
+  if(/(solo)/i.test(t))                             return {type:'generic',   title: labelGuess||'Solo'};
+
+  return {type:'generic', title: labelGuess || 'Section'};
+}
+
+function autoBadgeFrom(type, title){
+  // Extract numbers if present, for verses etc.
+  const numMatch = (title||'').match(/(\d+)/);
+  const n = numMatch ? numMatch[1] : null;
+  switch(type){
+    case 'verse':     return 'V'  + (n ? n : '');
+    case 'prechorus': return 'Pc';
+    case 'chorus':    return 'C';
+    case 'bridge':    return 'B';
+    case 'intro':     return 'I';
+    case 'interlude': return 'It';
+    case 'outro':     return 'O';
+    default:          return ''; // generic → no badge by default
+  }
 }
 
 /* ============================================================
-   Full ChordPro parser with colored section boxes
-   - {comment: X} starts a new box titled "X" (no duplicate line)
-   - chorus/bridge/verse tokens open titled boxes
-   - other comments can still appear inside sections
+   Full ChordPro parser with section badges + colored line
+   Editor overrides for the *next* section:
+   - {no_badge}       → hide badge
+   - {no_line}        → hide line
+   - {badge: X}       → set custom badge
+   - {plain_section}  → hide both
 ============================================================ */
 function parseChordPro(text){
   const lines=text.replace(/\r/g,'').split('\n');
   const meta={},parts=[];
-  let sectionOpen=false,blockType=null;
+  let sectionOpen=false, blockType=null;
 
-  const openSection=(title,tokenType=null)=>{
-    const {cls,label}=classifySection(title,tokenType);
-    parts.push(`<div class="section-box ${cls}">`);
-    parts.push(`<div class="section-title">${esc(label)}</div>`);
+  // Pending editor overrides for NEXT section
+  let nextNoBadge=false, nextNoLine=false, nextBadge=null, nextPlain=false;
+
+  const openSection=(labelGuess, tokenType=null)=>{
+    const cls = classifySection(labelGuess, tokenType);
+    const type = cls.type;
+    const title = cls.title;
+
+    // Apply overrides
+    const hideBadge = nextPlain ? true : nextNoBadge;
+    const hideLine  = nextPlain ? true : nextNoLine;
+    const badgeText = nextPlain ? ''   : (nextBadge!=null ? nextBadge : autoBadgeFrom(type, title));
+
+    // build section wrapper
+    parts.push(`<div class="section-box ${type}">`);
+    // line
+    if(!hideLine){
+      parts.push(`<div class="section-line"></div>`);
+    }
+    // badge
+    if(badgeText){
+      parts.push(`<div class="section-badge">${esc(badgeText)}</div>`);
+    }
+    // section title text
+    parts.push(`<div class="section-title">${esc(title)}</div>`);
+
+    // reset overrides AFTER use
+    nextNoBadge=false; nextNoLine=false; nextBadge=null; nextPlain=false;
+
     sectionOpen=true;
   };
+
   const closeSection=()=>{ if(sectionOpen){ parts.push('</div>'); sectionOpen=false; } };
 
   for(const raw of lines){
     const line=raw.trimEnd();
+
+    // Editor override tags for *next* section
+    const ovBadge = line.match(/^\{badge:\s*(.*?)\s*\}$/i);
+    if(ovBadge){ nextBadge = ovBadge[1]; continue; }
+    if(/^\{no_badge\}$/i.test(line)){ nextNoBadge = true; continue; }
+    if(/^\{no_line\}$/i.test(line)){ nextNoLine  = true; continue; }
+    if(/^\{plain_section\}$/i.test(line)){ nextPlain = true; continue; }
 
     // {tag: value}
     const kv=line.match(/^\{([^:}]+):\s*(.*?)\}$/);
@@ -243,15 +370,14 @@ function parseChordPro(text){
       if(['title','subtitle','artist','album','composer','lyricist','capo','key','time','tempo','language','duration','arranger'].includes(tag)){
         meta[tag]=val;
       }else if(tag==='comment'){
-        // Start a new section with the comment text as the title (do NOT repeat comment inside)
+        // Start a new colored section titled by the comment text (do NOT duplicate the comment line)
         closeSection();
         openSection(val, null);
       }else if(tag==='comment_italic'){
-        // Show italic comment inside current/open section (do not start a new one)
-        if(!sectionOpen) openSection('Section');
+        if(!sectionOpen) openSection('Section', null);
         parts.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`);
       }else if(tag==='comment_box'){
-        if(!sectionOpen) openSection('Section');
+        if(!sectionOpen) openSection('Section', null);
         parts.push(`<div class="comment box">${esc(val)}</div>`);
       }
       continue;
@@ -262,23 +388,26 @@ function parseChordPro(text){
     if(token){
       const tkn=token[1].toLowerCase();
 
-      // Open titled section boxes
-      if(['start_of_chorus','soc','start_chorus'].includes(tkn)){ closeSection(); blockType='chorus'; openSection('Chorus','chorus'); continue; }
-      if(['start_of_bridge','start_bridge'].includes(tkn)){     closeSection(); blockType='bridge'; openSection('Bridge','bridge'); continue; }
-      if(['verse','verso','estrofa'].includes(tkn)){            closeSection(); blockType=null;     openSection('Verse','verse');  continue; }
+      // Openers with implicit type + default title
+      if(['start_of_chorus','soc','start_chorus'].includes(tkn)){ closeSection(); blockType='chorus';    openSection('Chorus','chorus');    continue; }
+      if(['start_of_bridge','start_bridge'].includes(tkn)){       closeSection(); blockType='bridge';    openSection('Bridge','bridge');    continue; }
+      if(['verse','verso','estrofa'].includes(tkn)){              closeSection(); blockType=null;        openSection('Verse','verse');      continue; }
+      if(['start_of_tab','start_tab'].includes(tkn)){             if(!sectionOpen) openSection('Tab','generic'); blockType='tab'; continue; }
 
-      // Tab block stays inside current section
-      if(['start_of_tab','start_tab'].includes(tkn)){ if(!sectionOpen) openSection('Tab'); blockType='tab'; continue; }
+      // Additional common labels → their own section
+      if(['intro'].includes(tkn)){                                closeSection(); blockType=null;        openSection('Intro','intro');      continue; }
+      if(['interlude'].includes(tkn)){                            closeSection(); blockType=null;        openSection('Interlude','interlude'); continue; }
+      if(['outro'].includes(tkn)){                                closeSection(); blockType=null;        openSection('Outro','outro');      continue; }
+      if(['prechorus','pre_chorus'].includes(tkn)){               closeSection(); blockType=null;        openSection('Pre-Chorus','prechorus'); continue; }
 
-      // Closing tokens
+      // Closers
       if(['end_of_chorus','eoc','end_chorus','end_of_bridge','end_bridge','end_of_tab','end_tab','end_of_comment','end_comment'].includes(tkn)){
-        if(tkn.includes('tab')){ blockType=null; } else { blockType=null; closeSection(); }
+        if(tkn.includes('tab')){ blockType=null; }
+        else { blockType=null; closeSection(); }
         continue;
       }
 
-      // Other labels create their own titled box
-      if(['refrain','solo'].includes(tkn)){ closeSection(); openSection(tkn.toUpperCase()); continue; }
-
+      // Fallback: unknown token → ignore
       continue;
     }
 
@@ -286,12 +415,13 @@ function parseChordPro(text){
     if(line.trim()===''){ parts.push('<div style="height:10px"></div>'); continue; }
 
     // Content lines must live inside a section
-    if(!sectionOpen){ openSection('Section'); }
+    if(!sectionOpen){ openSection('Section', null); }
 
     if(blockType==='tab'){ parts.push(`<pre>${esc(line)}</pre>`); }
     else{ parts.push(renderLineTwoRow(line)); }
   }
 
+  // Close any open section
   closeSection();
 
   // Metadata header
@@ -372,30 +502,24 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
 .meta-row{font-size:11px;color:#666;margin-bottom:6px}
 pre{font-family:"Courier New",Courier,monospace;font-size:17px;line-height:1.45;white-space:pre-wrap;word-break:break-word;margin:4px 0;}
 .chord-strong{font-size:18px;font-weight:700}
-.section-box{background:#fff !important;border:1px solid #888 !important;border-radius:10px;padding:10px 14px;margin:14px 0;}
-.section-title{font-weight:700;color:#000 !important;margin-bottom:6px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-.viewer{column-count:2;column-gap:25mm;column-fill:auto;}
+.section-box{background:#fff !important;border:1px solid #888 !important;border-radius:12px;padding:18px 14px 14px 14px;margin:18px 0;position:relative;}
+.section-badge{position:absolute;top:-14px;left:14px;min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;padding:0 6px;font-size:12px;font-weight:800;border:2px solid #666 !important;color:#000 !important;}
+.section-line{position:absolute;top:0;left:52px;right:12px;height:2px;background:#666 !important;border-radius:2px;}
+.section-title{font-weight:700;color:#000 !important;margin:8px 0 6px 0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.viewer{column-count:2;column-gap:25mm;column-fill:auto;background:#fff !important;}
 .song-meta,.section-title,pre,.comment{break-inside:avoid;page-break-inside:avoid;}
 @media print{body{margin:12mm}pre{font-size:16px}}`;
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${css}</style></head><body><div class="viewer">${content}</div></body></html>`);
   w.document.close(); w.focus(); setTimeout(()=>{w.print();},250);
 });
 
-/* Large Text toggle (instant, temporary) */
+/* Large Text toggle (instant, with button text swap) */
 document.getElementById('toggleLargeText').addEventListener('click',()=>{
   const viewer = document.getElementById('outputArea');
   const btn = document.getElementById('toggleLargeText');
-
   viewer.classList.toggle('large-text');
-
-  // Update button text
-  if (viewer.classList.contains('large-text')) {
-    btn.textContent = "Normal Text";
-  } else {
-    btn.textContent = "Large Text";
-  }
+  btn.textContent = viewer.classList.contains('large-text') ? 'Normal Text' : 'Large Text';
 });
-
 
 /* Init */
 fillKeySelect();

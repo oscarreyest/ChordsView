@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChordPro Viewer — Full Tag Support + Improved Readability</title>
+<title>ChordPro Viewer — Full Support & Improved Readability</title>
 <style>
   :root{
     --page-bg:#fbfbfb; --card-bg:#ffffff; --muted:#6b7280;
@@ -19,7 +19,6 @@
   .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
   .btn{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:8px 12px;border-radius:8px;cursor:pointer;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
   .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn.ghost{background:transparent;border:1px solid #d6dbe8;color:#234}
   .controls .right{margin-left:auto;display:flex;gap:8px;align-items:center}
   select#keySelect{padding:8px 10px;border-radius:8px;border:1px solid #dfe7fb;background:#fff;color:#111;font-weight:600}
 
@@ -37,10 +36,9 @@
   .bridge{border-left:3px dashed #f7f3e6;background:#fffef9;padding:8px;border-radius:6px}
   .tab pre{background:#0b1220;color:#cfe8ff;overflow:auto}
   .comment{color:var(--muted);font-style:italic;margin:6px 0;padding-left:6px;border-left:2px solid #f0f0f0}
+  .comment.box{border-left:4px solid #ccc;background:#f8f8f8;padding:8px;border-radius:4px;font-style:normal;color:#333}
 
-  .hint{font-size:13px;color:var(--muted);margin-top:6px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-
   #loadExample,#render{display:none!important}
 
   @media print {
@@ -62,15 +60,14 @@
 <div class="wrap">
   <header>
     <h1>ChordPro Viewer</h1>
-    <p>Full tag support, larger chords & lyrics, and a clean two-column printable layout.</p>
+    <p>Full ChordPro tag support with improved readability and printable two-column layout.</p>
   </header>
 
   <div class="card">
     <label for="source" style="display:block;font-weight:600;margin-bottom:8px">ChordPro source</label>
-    <textarea id="source" placeholder="{title: Song}\n{artist: Someone}\n[C]Hello [G]world"></textarea>
+    <textarea id="source"></textarea>
 
     <div class="controls no-print" style="margin-top:10px">
-      <button id="loadExample" class="btn ghost">Load example</button>
       <button id="render" class="btn primary">Render</button>
       <button id="downloadCho" class="btn">Download .cho</button>
       <button id="shareLink" class="btn">Share Link</button>
@@ -80,11 +77,9 @@
         <select id="keySelect"><option value="">(original)</option></select>
       </div>
     </div>
-    <div class="hint">Tip: Select a target key to transpose the song. Share Link copies a URL that loads it automatically.</div>
   </div>
 
   <div id="outputArea" class="viewer card" aria-live="polite"></div>
-
   <footer>ChordPro Viewer by Oscar Reyes Tapia — host on GitHub Pages or embed via iframe.</footer>
 </div>
 
@@ -95,98 +90,93 @@ const FLAT_EQ={Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
 let transposeSteps=0,songOriginalKey=null;
 function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function transposeChordToken(t,s){const p=t.split('/');const main=p[0],bass=p[1];
- const trans=(ch)=>{const m=ch.match(/^([A-G])([#b])?(.*)$/);if(!m)return ch;let[,r,a,rest]=m;let full=r+(a||'');if(FLAT_EQ[full])full=FLAT_EQ[full];let i=NOTES.indexOf(full);
- if(i===-1)return ch;let ni=(i+s)%12;if(ni<0)ni+=12;return NOTES[ni]+(rest||'');};return bass?(trans(main)+'/'+trans(bass)):trans(main);}
+ const trans=(ch)=>{const m=ch.match(/^([A-G])([#b])?(.*)$/);if(!m)return ch;
+ let[,r,a,rest]=m;let full=r+(a||'');if(FLAT_EQ[full])full=FLAT_EQ[full];
+ let i=NOTES.indexOf(full);if(i===-1)return ch;
+ let ni=(i+s)%12;if(ni<0)ni+=12;return NOTES[ni]+(rest||'');};
+ return bass?(trans(main)+'/'+trans(bass)):trans(main);}
 function applyTransposeToText(t,s){return t.replace(/\[([^\]]+)\]/g,(_,ch)=>'['+ch.split(/\s+/).filter(Boolean).map(x=>transposeChordToken(x,s)).join(' ')+']');}
 function renderLineTwoRow(l){let lyric='',segs=[],acc='',inch=false,len=0;
- for(let i=0;i<l.length;i++){const c=l[i];if(c==='['){inch=true;acc='';}
+ for(let i=0;i<l.length;i++){const c=l[i];
+  if(c==='['){inch=true;acc='';}
   else if(c===']'){inch=false;const pad=lyric.length-len;if(pad>0)segs.push({t:'s',l:pad});segs.push({t:'c',x:acc});len+=(pad>0?pad:0)+acc.length;}
   else if(inch){acc+=c;}else{lyric+=c;}}
  let out='';for(const s of segs){out+=s.t==='s'?' '.repeat(s.l):`<span class="chord-strong">${esc(s.x)}</span>`;}
  return out.trim()?`<pre>${out}\n${esc(lyric)}</pre>`:(lyric.trim()?`<pre>${esc(lyric)}</pre>`:'<div style="height:8px"></div>');}
 
 function parseChordPro(text){
-  const lines=text.replace(/\r/g,'').split('\n');
-  const meta={},otherTags={},parts=[];
-  let blockStack=[],blockType=null;
-  function openBlock(t){blockStack.push(t);blockType=t;
-    if(t==='chorus')parts.push('<div class="chorus"><div class="section-label">Chorus</div>');
-    else if(t==='bridge')parts.push('<div class="bridge"><div class="section-label">Bridge</div>');
-    else if(t==='tab')parts.push('<div class="tab">');
-    else if(t==='comment_box')parts.push('<div class="comment" style="border-left:4px solid #eee;padding-left:8px">');}
-  function closeBlock(){if(blockStack.length===0)return;const t=blockStack.pop();if(['chorus','bridge','tab','comment_box'].includes(t))parts.push('</div>');blockType=blockStack.at(-1)||null;}
+ const lines=text.replace(/\r/g,'').split('\n');
+ const meta={},otherTags={},parts=[];
+ let blockStack=[],blockType=null;
+ function openBlock(t){blockStack.push(t);blockType=t;
+  if(t==='chorus')parts.push('<div class="chorus"><div class="section-label">Chorus</div>');
+  else if(t==='bridge')parts.push('<div class="bridge"><div class="section-label">Bridge</div>');
+  else if(t==='tab')parts.push('<div class="tab">');
+  else if(t==='comment_box')parts.push('<div class="comment box">');}
+ function closeBlock(){if(!blockStack.length)return;const t=blockStack.pop();if(['chorus','bridge','tab','comment_box'].includes(t))parts.push('</div>');blockType=blockStack.at(-1)||null;}
 
-  for(let raw of lines){
-    const line=raw.trimEnd();
-    const kv=line.match(/^\{([^:}]+):\s*(.*?)\}$/);
-    const token=line.match(/^\{([a-zA-Z0-9_\-]+)\}$/);
-    if(kv){
-      const tag=kv[1].toLowerCase(),val=kv[2];
-      if(['title','subtitle','artist','album','composer','lyricist','capo','key','time','tempo','language','duration','arranger'].includes(tag)){
-        meta[tag]=val;
-      } else if(['comment','comment_italic','comment_box'].includes(tag)){
-        if(tag==='comment_italic')parts.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`);
-        else if(tag==='comment_box')parts.push(`<div class="comment" style="border-left:4px solid #eee;padding-left:8px">${esc(val)}</div>`);
-        else parts.push(`<div class="comment">${esc(val)}</div>`);
-      } else {otherTags[tag]=val;}
-      continue;
-    } else if(token){
-      const tkn=token[1].toLowerCase();
-      if(['start_of_chorus','soc','start_chorus'].includes(tkn)){openBlock('chorus');continue;}
-      if(['end_of_chorus','eoc','end_chorus'].includes(tkn)){closeBlock();continue;}
-      if(['start_of_bridge','start_bridge'].includes(tkn)){openBlock('bridge');continue;}
-      if(['end_of_bridge','end_bridge'].includes(tkn)){closeBlock();continue;}
-      if(['start_of_tab','start_tab'].includes(tkn)){openBlock('tab');continue;}
-      if(['end_of_tab','end_tab'].includes(tkn)){closeBlock();continue;}
-      if(['start_of_comment','comment_box'].includes(tkn)){openBlock('comment_box');continue;}
-      if(['end_of_comment','end_comment'].includes(tkn)){closeBlock();continue;}
-      if(['verse','chorus','bridge','refrain','solo'].includes(tkn)){parts.push(`<div class="section-label">${esc(tkn.toUpperCase())}</div>`);continue;}
-      parts.push(`<div class="unknown-tag">{${esc(tkn)}}</div>`);continue;
-    }
-    if(line.trim()===''){parts.push('<div style="height:10px"></div>');continue;}
-    if(blockType==='tab'){parts.push(`<pre>${esc(line)}</pre>`);continue;}
-    parts.push(renderLineTwoRow(line));
+ for(const raw of lines){
+  const line=raw.trimEnd();
+  const kv=line.match(/^\{([^:}]+):\s*(.*?)\}$/);
+  const token=line.match(/^\{([a-zA-Z0-9_\-]+)\}$/);
+  if(kv){
+    const tag=kv[1].toLowerCase(),val=kv[2];
+    if(['title','subtitle','artist','album','composer','lyricist','capo','key','time','tempo','language','duration','arranger'].includes(tag)){
+      meta[tag]=val;
+    }else if(['comment','comment_italic','comment_box'].includes(tag)){
+      if(tag==='comment_italic')parts.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`);
+      else if(tag==='comment_box')parts.push(`<div class="comment box">${esc(val)}</div>`);
+      else parts.push(`<div class="comment">${esc(val)}</div>`);
+    }else otherTags[tag]=val;
+    continue;
+  }else if(token){
+    const tkn=token[1].toLowerCase();
+    if(['start_of_chorus','soc','start_chorus'].includes(tkn)){openBlock('chorus');continue;}
+    if(['end_of_chorus','eoc','end_chorus'].includes(tkn)){closeBlock();continue;}
+    if(['start_of_bridge','start_bridge'].includes(tkn)){openBlock('bridge');continue;}
+    if(['end_of_bridge','end_bridge'].includes(tkn)){closeBlock();continue;}
+    if(['start_of_tab','start_tab'].includes(tkn)){openBlock('tab');continue;}
+    if(['end_of_tab','end_tab'].includes(tkn)){closeBlock();continue;}
+    if(['start_of_comment','comment_box'].includes(tkn)){openBlock('comment_box');continue;}
+    if(['end_of_comment','end_comment'].includes(tkn)){closeBlock();continue;}
+    if(['verse','chorus','bridge','refrain','solo'].includes(tkn)){parts.push(`<div class="section-label">${esc(tkn.toUpperCase())}</div>`);continue;}
+    continue;
   }
-  while(blockStack.length)closeBlock();
+  if(line.trim()===''){parts.push('<div style="height:10px"></div>');continue;}
+  if(blockType==='tab'){parts.push(`<pre>${esc(line)}</pre>`);continue;}
+  parts.push(renderLineTwoRow(line));
+ }
+ while(blockStack.length)closeBlock();
 
-  // metadata
-  let metaHtml='<div class="song-meta">';
-  if(meta.title)metaHtml+=`<div class="title">${esc(meta.title)}</div>`;
-  if(meta.subtitle)metaHtml+=`<div class="subtitle">${esc(meta.subtitle)}</div>`;
-  if(meta.artist||meta.album){
-    metaHtml+='<div class="meta-row">';
-    if(meta.artist)metaHtml+=`Artist: ${esc(meta.artist)} `;
-    if(meta.album)metaHtml+=`• Album: ${esc(meta.album)}`;
-    metaHtml+='</div>';
-  }
-  const extras=[];
-  if(meta.key)extras.push('Key: '+esc(meta.key));
-  if(meta.capo)extras.push('Capo: '+esc(meta.capo));
-  if(meta.time)extras.push('Time: '+esc(meta.time));
-  if(meta.tempo)extras.push('Tempo: '+esc(meta.tempo));
-  if(extras.length)metaHtml+=`<div class="meta-row">${extras.join(' • ')}</div>`;
-  if(Object.keys(otherTags).length){
-    metaHtml+='<div class="meta-row"><strong>Other:</strong> '+Object.entries(otherTags).map(([k,v])=>`${esc(k)}: ${esc(v)}`).join(' • ')+'</div>';
-  }
+ let metaHtml='<div class="song-meta">';
+ if(meta.title)metaHtml+=`<div class="title">${esc(meta.title)}</div>`;
+ if(meta.subtitle)metaHtml+=`<div class="subtitle">${esc(meta.subtitle)}</div>`;
+ if(meta.artist||meta.album){
+  metaHtml+='<div class="meta-row">';
+  if(meta.artist)metaHtml+=`Artist: ${esc(meta.artist)} `;
+  if(meta.album)metaHtml+=`• Album: ${esc(meta.album)}`;
   metaHtml+='</div>';
-  return metaHtml+parts.join('\n');
+ }
+ const extras=[];
+ if(meta.key)extras.push('Key: '+esc(meta.key));
+ if(meta.time)extras.push('Time: '+esc(meta.time));
+ if(meta.tempo)extras.push('Tempo: '+esc(meta.tempo));
+ if(meta.capo)extras.push('Capo: '+esc(meta.capo));
+ if(extras.length)metaHtml+=`<div class="meta-row">${extras.join(' • ')}</div>`;
+ metaHtml+='</div>';
+ return metaHtml+parts.join('\n');
 }
 
 function normalizeKey(k){if(!k)return null;const m=k.trim().match(/^([A-G])([#b]?)(m?)$/i);if(!m)return null;let root=m[1].toUpperCase(),acc=m[2]||'',min=m[3]?'m':'';let full=root+acc;if(FLAT_EQ[full])full=FLAT_EQ[full];return full+min;}
 function computeSemitoneDiff(a,b){const nf=normalizeKey(a),nt=normalizeKey(b);if(!nf||!nt)return 0;const i1=NOTES.indexOf(nf.replace(/m$/,'')),i2=NOTES.indexOf(nt.replace(/m$/,''));let d=i2-i1;if(d>6)d-=12;if(d<-6)d+=12;return d;}
 function fillKeySelect(){const s=document.getElementById('keySelect');s.innerHTML='<option value="">(original)</option>';for(const k of MAJOR_KEYS){const o=document.createElement('option');o.value=k;o.textContent=k;s.appendChild(o);}const sep=document.createElement('option');sep.disabled=true;sep.textContent='── minor keys ──';s.appendChild(sep);for(const k of MAJOR_KEYS){const o=document.createElement('option');o.value=k+'m';o.textContent=k+'m';s.appendChild(o);}}
+
 function render(){const raw=document.getElementById('source').value||'';const m=raw.match(/\{key:\s*([A-G][#b]?m?)\s*\}/i);songOriginalKey=m?m[1].replace(/\s+/g,''):null;const sel=document.getElementById('keySelect').value;transposeSteps=sel&&songOriginalKey?computeSemitoneDiff(songOriginalKey,sel):0;document.getElementById('outputArea').innerHTML=`<div class="music-block">${parseChordPro(applyTransposeToText(raw,transposeSteps))}</div>`;}
+
 document.getElementById('keySelect').addEventListener('change',e=>{const t=e.target.value;transposeSteps=(!t||!songOriginalKey)?0:computeSemitoneDiff(songOriginalKey,t);render();});
-document.getElementById('exportPdf').addEventListener('click',()=>{const content=document.getElementById('outputArea').innerHTML;const title=(document.querySelector('.title')&&document.querySelector('.title').textContent)||'ChordPro Song';const w=window.open('','_blank');const css=`body{font-family:Georgia,"Times New Roman",serif;margin:20mm;color:#111;background:#fff;}
-.title{font-size:26px;font-weight:700;margin-bottom:6px}
-.meta-row{font-size:11px;color:#666;margin-bottom:6px}
-pre{font-family:"Courier New",Courier,monospace;font-size:18px;line-height:1.6;margin:6px 0;}
-.chord-strong{font-size:20px;font-weight:700}
-.viewer{column-count:2;column-gap:20mm;column-fill:balance;}
-.song-meta,.section-label,pre,.chorus,.bridge,.tab,.comment{break-inside:avoid;page-break-inside:avoid;}
-.music-block{page-break-before:auto;page-break-after:auto;page-break-inside:avoid;}
-@media print{body{margin:12mm}pre{font-size:17px}}`;w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${css}</style></head><body><div class="viewer">${content}</div></body></html>`);w.document.close();w.focus();setTimeout(()=>{w.print();},250);});
-fillKeySelect();render();
+document.getElementById('render').addEventListener('click',()=>render());
+fillKeySelect();
+render();
 </script>
 </body>
 </html>

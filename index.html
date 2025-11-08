@@ -66,8 +66,22 @@
   .meta-row{font-size:var(--meta-size);color:var(--muted);font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif}
 
   /* Header box & header badges (use same badge style/colors as sections) */
-  .header-box{border:1px solid #dce2ea;border-radius:12px;padding:14px 16px;margin-bottom:12px}
-  .header-content{text-align:center}
+  .header-box {
+  border: 1px solid #dce2ea;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 auto 12px auto; /* centers horizontally */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+  .header-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
   .header-badges{
     display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;
     margin-top:var(--header-gap);

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ChordPro Viewer — Unified Screen & Print (Auto-Fit Letter)</title>
+<title>ChordPro Viewer — Unified Screen & Print (Auto-Fit Letter, Option A)</title>
 <style>
   :root{
     /* Base palette */
@@ -65,7 +65,7 @@
   .subtitle{font-size:var(--subtitle-size);font-style:italic;color:var(--muted);margin:0 0 6px 0}
   .meta-row{font-size:var(--meta-size);color:var(--muted);font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif}
 
-  /* Header box & header badges (use same badge style/colors as sections) */
+  /* Header box & header badges (same style/colors as sections) */
   .header-box{border:1px solid #dce2ea;border-radius:12px;padding:14px 16px;margin-bottom:12px}
   .header-content{text-align:center}
   .header-badges{
@@ -125,8 +125,11 @@
   }
   .chord-strong{font-weight:700;font-size:var(--chord-size)}
 
-  /* Two-column class (used by auto-fit) */
-  .viewer.two-col{column-count:2; column-gap:var(--column-gap); column-fill:auto;}
+  /* Two-column class (with webkit prefixes for Safari/Chrome print) */
+  .viewer.two-col{
+    column-count:2; column-gap:var(--column-gap); column-fill:auto;
+    -webkit-column-count:2; -webkit-column-gap:var(--column-gap); -webkit-column-fill:auto;
+  }
   .viewer.two-col .section-box,
   .viewer.two-col pre,
   .viewer.two-col .comment{break-inside:avoid; page-break-inside:avoid;}
@@ -140,7 +143,7 @@
   @media print{
     body{margin:12mm;background:#fff}
     .controls,.no-print{display:none !important}
-    .viewer{box-shadow:none; padding:0} /* same look; columns controlled by .two-col */
+    .viewer{box-shadow:none; padding:0} /* columns controlled by .two-col and variables copied at print time */
     @page{size:Letter; margin:12mm;}
   }
 </style>
@@ -221,6 +224,14 @@ const MAJOR_KEYS=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const FLAT_EQ={Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
 let transposeSteps=0,songOriginalKey=null;
+
+/* Remember latest fit so print matches screen */
+let LAST_FIT = {
+  twoCols:false,
+  vars:{
+    lyric:16, chord:17, line:1.6, sectionTitle:16, meta:14, badge:12, title:32, subtitle:18, viewerPad:24
+  }
+};
 
 const esc=s=>(s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -463,12 +474,12 @@ function computeSemitoneDiff(a,b){ const nf=normalizeKey(a), nt=normalizeKey(b);
   const i1=NOTES.indexOf(nf.replace(/m$/,'')), i2=NOTES.indexOf(nt.replace(/m$/,'')); let d=i2-i1; if(d>6)d-=12; if(d<-6)d+=12; return d; }
 function fillKeySelect(){
   const s=document.getElementById('keySelect'); s.innerHTML='<option value="">(original)</option>';
-  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k; o.textContent=k; s.appendChild(o); }
+  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k; o.textContent=k; s.appendChild(o);}
   const sep=document.createElement('option'); sep.disabled=true; sep.textContent='── minor keys ──'; s.appendChild(sep);
-  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k+'m'; o.textContent=k+'m'; s.appendChild(o); }
+  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k+'m'; o.textContent=k+'m'; s.appendChild(o);}
 }
 
-/* ========== Auto-Fit Engine (Letter, 1–2 col, scaling) ========== */
+/* ====== Auto-Fit Engine (Option A: shrink to 1 Letter page if possible) ====== */
 function setVars({lyric, chord, line, sectionTitle, meta, badge, title, subtitle, viewerPad}){
   const v=document.getElementById('outputArea');
   v.style.setProperty('--lyric-size', lyric+'px');
@@ -480,17 +491,24 @@ function setVars({lyric, chord, line, sectionTitle, meta, badge, title, subtitle
   v.style.setProperty('--title-size', title+'px');
   v.style.setProperty('--subtitle-size', subtitle+'px');
   v.style.setProperty('--viewer-pad', viewerPad+'px');
+  LAST_FIT.vars = {lyric, chord, line, sectionTitle, meta, badge, title, subtitle, viewerPad};
 }
 
-function measureFitsOneScreen(){
-  // Available height: viewport minus a small buffer for outer margins
+function pxPerMM(){ return 96/25.4; } // ~3.7795
+function letterPrintableHeightPx(marginMM=12){ // 11in = 279.4mm
+  const hMM = 279.4 - 2*marginMM;
+  return Math.floor(hMM * pxPerMM());
+}
+function measureFitsLetter(){
   const v=document.getElementById('outputArea');
-  const avail = window.innerHeight * 0.90;
-  return v.scrollHeight <= avail;
+  const limit = letterPrintableHeightPx(12); // match @page margin
+  // Measure natural height (no outer margins from page)
+  return v.scrollHeight <= limit;
 }
 
 function applyColumns(twoCols){
   const v=document.getElementById('outputArea');
+  LAST_FIT.twoCols = !!twoCols;
   if(twoCols) v.classList.add('two-col'); else v.classList.remove('two-col');
 }
 
@@ -499,29 +517,30 @@ function autoFit(){
   applyColumns(false);
   setVars({lyric:16, chord:17, line:1.6, sectionTitle:16, meta:14, badge:12, title:32, subtitle:18, viewerPad:24});
 
-  // Quick check
-  if(measureFitsOneScreen()) return;
+  // First try: 1 column fit to Letter height
+  if(measureFitsLetter()) return;
 
-  // Try 2 columns
+  // Try: 2 columns
   applyColumns(true);
-  if(measureFitsOneScreen()) return;
+  if(measureFitsLetter()) return;
 
-  // Downscale gradually, but keep chord readability
+  // Aggressive shrink loop (Option A): reduce until it fits, within safe minima
   let lyric=16, chord=17, line=1.58, sectionTitle=15, meta=13, badge=12, title=30, subtitle=17, viewerPad=20;
-  for(let step=0; step<6; step++){
-    lyric=Math.max(13, lyric-1);
-    chord=Math.max(14, chord-1);
-    line =Math.max(1.45, (line-0.02));
-    sectionTitle=Math.max(14, sectionTitle-1);
-    meta=Math.max(12, meta-1);
-    badge=Math.max(11, badge-1);
-    title=Math.max(26, title-1);
-    subtitle=Math.max(16, subtitle-1);
-    viewerPad=Math.max(12, viewerPad-2);
+  const min = {lyric:12, chord:13, line:1.35, sectionTitle:13, meta:11, badge:10, title:24, subtitle:14, viewerPad:10};
+  for(let step=0; step<16; step++){
+    lyric=Math.max(min.lyric, lyric-1);
+    chord=Math.max(min.chord, chord-1);
+    line =Math.max(min.line,  (line-0.02));
+    sectionTitle=Math.max(min.sectionTitle, sectionTitle-1);
+    meta=Math.max(min.meta, meta-1);
+    badge=Math.max(min.badge, badge-1);
+    title=Math.max(min.title, title-1);
+    subtitle=Math.max(min.subtitle, subtitle-1);
+    viewerPad=Math.max(min.viewerPad, viewerPad-1);
     setVars({lyric, chord, line, sectionTitle, meta, badge, title, subtitle, viewerPad});
-    if(measureFitsOneScreen()) return;
+    if(measureFitsLetter()) return;
   }
-  // If still overflowing, we've reached minimum safe sizes; allow natural overflow (page 2).
+  // If still overflowing after max shrink, it will go multi-page (rare/very long).
 }
 
 /* ================== Render pipeline ================== */
@@ -565,60 +584,55 @@ document.getElementById('shareLink').addEventListener('click',async()=>{
   try{ await navigator.clipboard.writeText(url); alert('Link copied to clipboard'); }
   catch(e){ prompt('Copy this link:',url); }
 });
+
+/* ====== Export: print rendered viewer only, copy fit state exactly ====== */
 document.getElementById('exportPdf').addEventListener('click', () => {
-
   const content = document.getElementById('outputArea').innerHTML;
+  const viewer = document.getElementById('outputArea');
 
-  // Extract <style> content inside <head>
+  // Collect CSS variables from computed styles so print matches screen
+  const cs = getComputedStyle(viewer);
+  const vars = [
+    '--lyric-size','--chord-size','--pre-line','--section-title','--meta-size',
+    '--badge-font','--title-size','--subtitle-size','--viewer-pad','--column-gap'
+  ].map(k=>`${k}:${cs.getPropertyValue(k).trim()}`).join(';');
+
+  const twoColClass = viewer.classList.contains('two-col') ? 'two-col' : '';
+
+  // Copy all <style> tags (keeps colors & layout)
   const styles = Array.from(document.querySelectorAll('style'))
     .map(style => style.outerHTML)
     .join('\n');
 
-  const printWindow = window.open("", "_blank", "width=900,height=1100");
-
-  printWindow.document.write(`
+  const w = window.open("", "_blank", "width=900,height=1100");
+  w.document.write(`
     <!doctype html>
     <html>
     <head>
       <meta charset="utf-8">
       <title>Print Song</title>
       ${styles}
-
       <style>
-        /* Force print window background + padding */
-        body {
-          margin: 0;
-          background: white;
+        body { margin: 0; background: white; }
+        @page { size: Letter; margin: 12mm; }
+        /* Ensure columns apply in print for WebKit/Chrome */
+        .viewer.two-col{
+          column-count:2; column-gap:var(--column-gap); column-fill:auto;
+          -webkit-column-count:2; -webkit-column-gap:var(--column-gap); -webkit-column-fill:auto;
         }
-        @page {
-          size: Letter;
-          margin: 12mm;
-        }
-
-        /* FORCE viewer into the same format you use on screen */
-        .viewer {
-          padding: var(--viewer-pad);
-          background: #fff;
-        }
+        .viewer{ box-shadow:none; }
       </style>
-
     </head>
     <body>
-      <div class="viewer">
+      <div class="viewer ${twoColClass}" style="${vars}">
         ${content}
       </div>
     </body>
     </html>
   `);
-
-  printWindow.document.close();
-  printWindow.focus();
-
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 250);
-
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{ w.print(); w.close(); }, 300);
 });
 
 /* Init key options + optional ?song= */

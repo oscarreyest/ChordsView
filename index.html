@@ -368,6 +368,7 @@ function replaceSingleBracketWithDisplayKey(text,selValue){
 function renderHeaderRaw(headerText, metaFallback=null, selValue=''){
   let html='<div class="header-box"><div class="header-content">';
   let sectionListStr=null;
+  let metaLine = null;
 
   const pushLine=s=>{ html += `<div>${s}</div>`; };
 
@@ -382,7 +383,10 @@ function renderHeaderRaw(headerText, metaFallback=null, selValue=''){
         else if(tag==='subtitle') pushLine(`<div class="subtitle">${esc(val)}</div>`);
         else if(tag==='artist') pushLine(`<div class="meta-row">Artist: ${esc(val)}</div>`);
         else if(tag==='album') pushLine(`<div class="meta-row">Album: ${esc(val)}</div>`);
-        else if(['key','time','tempo','capo'].includes(tag)) pushLine(`<div class="meta-row">${tag[0].toUpperCase()+tag.slice(1)}: ${esc(val)}</div>`);
+        else if(['key','time','tempo','capo'].includes(tag)) {
+  if (!metaLine) metaLine = [];
+  metaLine.push(`${tag[0].toUpperCase()+tag.slice(1)}: ${esc(val)}`);
+}
         else if(tag==='comment') pushLine(`<div class="meta-row">${esc(val)}</div>`);
         else if(tag==='comment_box'){
   const updated=replaceSingleBracketWithDisplayKey(val, selValue);
@@ -416,7 +420,9 @@ function renderHeaderRaw(headerText, metaFallback=null, selValue=''){
     }
     sectionListStr = metaFallback.section_list || null;
   }
-
+if (metaLine && metaLine.length) {
+  html += `<div class="meta-row">${metaLine.join(' | ')}</div>`;
+}
   html+='</div>'; // header-content
   const badges=buildHeaderBadges(sectionListStr);
   if(badges) html+=badges;

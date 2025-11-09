@@ -169,37 +169,22 @@ pre {
   padding: 2px 0 !important;
   margin: 2px 0 !important;
   line-height: 1.45 !important;
-}/* Ultra-compact spacing between song sections */
+}
+/* Tighter spacing between section boxes */
 .section-box {
-  margin: 8px 0 !important;          /* minimal gap between sections */
+  margin: 12px 0 !important;   /* was ~22px, now tighter */
 }
-/* Tighten section body padding */
+
+/* Also reduce padding inside section body slightly */
 .section-body {
-  padding: 0 12px 6px 12px !important;  /* reduced inner padding */
+  padding-bottom: 8px !important;
 }
 
-/* Compact section headers */
+/* Optional: make the section title a bit closer to content */
 .section-head {
-  padding: 10px 12px 2px 12px !important;
+  padding-bottom: 4px !important;
 }
 
-/* Slightly smaller titles for space efficiency */
-.section-title {
-  margin-top: 4px !important;
-  margin-bottom: 2px !important;
-}
-
-/* Slightly reduce space in header badges area */
-.header-badges {
-  margin-top: 4px !important;
-  gap: 6px !important;
-}
-
-/* Keep footer visible but subtle */
-footer {
-  margin-top: 6px !important;
-  font-size: 12px !important;
-}
   /* Print: keep colors and layout identical; only margins and shadows change */
   @media print{
     body{margin:12mm;background:#fff}

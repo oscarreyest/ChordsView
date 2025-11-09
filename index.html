@@ -191,6 +191,18 @@ pre {
     .viewer{box-shadow:none; padding:0} /* columns controlled by .two-col */
     @page{size:Letter; margin:12mm;}
   }
+/* Tighter spacing between chords and lyrics inside <pre> blocks (applies to both screen & print) */
+pre {
+  line-height: 1.25 !important; /* tighter vertical spacing between chords and lyrics */
+}
+
+/* Ensure print version preserves the same spacing and layout */
+@media print {
+  pre {
+    line-height: 1.25 !important;
+  }
+}
+
 </style>
 </head>
 <body>

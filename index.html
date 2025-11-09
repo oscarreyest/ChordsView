@@ -174,7 +174,6 @@ pre {
 .section-box {
   margin: 12px 0 !important;   /* was ~22px, now tighter */
 }
-
 /* Also reduce padding inside section body slightly */
 .section-body {
   padding-bottom: 8px !important;
@@ -184,27 +183,7 @@ pre {
 .section-head {
   padding-bottom: 4px !important;
 }
-/* Prevent badges and headers from being clipped at column breaks */
-.section-box {
-  overflow: visible !important;     /* allow badge to render beyond box bounds */
-  position: relative !important;
-}
 
-.section-head {
-  break-inside: avoid !important;
-  page-break-inside: avoid !important;
-  -webkit-column-break-inside: avoid !important;
-  -moz-column-break-inside: avoid !important;
-  padding-top: 22px !important;     /* give a little breathing room for badges */
-  overflow: visible !important;
-}
-
-/* Ensure badges and header lines stay visible and above overflow clipping */
-.section-badge,
-.section-line {
-  position: relative !important;
-  z-index: 5 !important;
-}
  /* Print: keep colors and layout identical; only margins and shadows change */
   @media print{
     body{margin:12mm;background:#fff}

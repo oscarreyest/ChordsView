@@ -170,6 +170,20 @@ pre {
   margin: 2px 0 !important;
   line-height: 1.45 !important;
 }
+/* Tighter spacing between section boxes */
+.section-box {
+  margin: 12px 0 !important;   /* was ~22px, now tighter */
+}
+
+/* Also reduce padding inside section body slightly */
+.section-body {
+  padding-bottom: 8px !important;
+}
+
+/* Optional: make the section title a bit closer to content */
+.section-head {
+  padding-bottom: 4px !important;
+}
   /* Print: keep colors and layout identical; only margins and shadows change */
   @media print{
     body{margin:12mm;background:#fff}

@@ -162,14 +162,13 @@
   .comment.box{border-left:4px solid #ccc;background:#f8f8f8;padding:8px;border-radius:6px;font-style:normal;color:#333}
 
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-  /* Semi-transparent lyric/chord boxes for subtle separation */
+ /* Compact and transparent lyric/chord boxes */
 pre {
-  background: rgba(255, 255, 255, 0.55) !important;  /* faint white overlay */
-  border: none !important;                           /* no box outline */
-  padding: 3px 4px !important;                       /* small internal space */
-  margin: 3px 0 !important;                          /* compact spacing */
-  line-height: 1.45 !important;                      /* preserve chord alignment */
-  border-radius: 4px;                                /* slight rounding for soft feel */
+  background: transparent !important;
+  border: none !important;
+  padding: 2px 0 !important;
+  margin: 2px 0 !important;
+  line-height: 1.45 !important;
 }
   /* Print: keep colors and layout identical; only margins and shadows change */
   @media print{

@@ -162,7 +162,14 @@
   .comment.box{border-left:4px solid #ccc;background:#f8f8f8;padding:8px;border-radius:6px;font-style:normal;color:#333}
 
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-
+  /* Compact and transparent lyric/chord boxes */
+pre {
+  background: transparent !important;
+  border: none !important;
+  padding: 2px 0 !important;
+  margin: 2px 0 !important;
+  line-height: 1.45 !important;
+}
   /* Print: keep colors and layout identical; only margins and shadows change */
   @media print{
     body{margin:12mm;background:#fff}
@@ -182,44 +189,31 @@
     <div class="card">
       <label for="source" style="display:block;font-weight:600;margin-bottom:8px">ChordPro source</label>
       <textarea id="source" placeholder="{start_header}
-{title: Tú Eres Digno de Gloria}
-{artist: ICZ Worship}
-{key: Am}
+{title: *******}
+{artist: ***
+{key: C}
 {time: 4/4}
-{tempo: 126}
-{comment_box: Key changed to: [Am]}
+{tempo:  000}
+{comment_box: Key changed to: [C]}
 {section_list: I, V1, C, B }
 {end_header}
 
 {comment: Intro} 		
-[F]   [G]   [F]   [G]
+[C]   [C]   [C]   [C]
 {comment: Verso}		                 
-Hoy te alabamos Señ[F]or  [G]
-Y declaramos que [F]Tú eres nuestro Di[G]os
-Tu eres el Dios del am[F]or  [G] 
-Y ya no somos escl[F]avos del tem[G]or
-{comment_italic: Entra Bateria}		                 
-Hoy te adoramos Señ[F]or  [G]
-Y te cantamos con nu[F]estro coraz[G]ón
-Te damos todo el hon[F]or   [G]
-Sobre el cielo y la ti[F]erra
-Tu eres Señ[G]or
+H[C]A
+{comment_italic: Comentarios}		                 
+
 {start_of_chorus}
-Tu eres digno de gl[C]oria   [G]
-Sobre toda la ti[Am]erra Tú eres Di[F]os
-Tu eres digno de r[C]ecibir
-Toda ad[G]oración
-Todo [Am]el honor sea a [F]Tí
+T[C]a
+T[C]b
 {end_of_chorus}
 {comment: Interludio}	
-[F]  [G]  [F]  [G]
+[C]  [C]  [C]  [C]
 {comment: Interludio 2}	
-[Am]   [F]  [C]  [G]
+[C]   [C]  [C]  [C]
 {start_of_bridge}		
-[Am]Eres digno
-[F]Eres santo
-[C]Eres Rey
-De [G]toda creación
+[C]Abc
 {end_of_bridge}"></textarea>
 
       <div class="controls no-print">

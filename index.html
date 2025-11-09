@@ -184,7 +184,21 @@ pre {
 .section-head {
   padding-bottom: 4px !important;
 }
+/* Prevent section headers and badges from being split across columns/pages */
+.section-box,
+.section-head,
+.section-line,
+.section-badge {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+  -webkit-column-break-inside: avoid !important;
+  -moz-column-break-inside: avoid !important;
+}
 
+/* Add a tiny top padding to ensure badges don't clip at column edges */
+.section-head {
+  padding-top: 18px !important;
+}
   /* Print: keep colors and layout identical; only margins and shadows change */
   @media print{
     body{margin:12mm;background:#fff}

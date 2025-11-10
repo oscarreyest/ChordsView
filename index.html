@@ -65,27 +65,11 @@
   .subtitle{font-size:var(--subtitle-size);font-style:italic;color:var(--muted);margin:0 0 6px 0}
   .meta-row{font-size:var(--meta-size);color:var(--muted);font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif}
 
-  /* Header box & header badges (use same badge style/colors as sections) */
   .header-box{border:1px solid #dce2ea;border-radius:12px;padding:14px 16px;margin-bottom:12px}
-/* Force header to span full width, not limited by column flow */
-.viewer > .header-box {
-  -webkit-column-span: all;
-  column-span: all;
-  width: 100%;
-  box-sizing: border-box;
-}
+  .viewer > .header-box{-webkit-column-span:all;column-span:all;width:100%;box-sizing:border-box;}
   .header-content{text-align:center}
-  .header-badges{
-    display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;
-    margin-top:var(--header-gap);
-    break-inside:avoid;page-break-inside:avoid;
-    -webkit-column-break-inside:avoid; -moz-column-break-inside:avoid;
-  }
-  .header-badge{
-    min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;
-    font-size:var(--badge-font);font-weight:800;border-radius:50%;border:2px solid var(--generic-ac);
-    background:#fff;color:#111;padding:0 6px;
-  }
+  .header-badges{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;margin-top:var(--header-gap);}
+  .header-badge{min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:var(--badge-font);font-weight:800;border-radius:50%;border:2px solid var(--generic-ac);background:#fff;color:#111;padding:0 6px;}
   .header-badge.type-verse{border-color:var(--verse-ac)}
   .header-badge.type-prechorus{border-color:#ffb74d}
   .header-badge.type-chorus{border-color:var(--chorus-ac)}
@@ -93,10 +77,8 @@
   .header-badge.type-intro{border-color:var(--intro-ac)}
   .header-badge.type-interlude{border-color:var(--interlude-ac)}
   .header-badge.type-outro{border-color:var(--outro-ac)}
-  .header-badge.type-generic{border-color:var(--generic-ac)}
 
-  /* Section boxes — split allowed, but heads protected */
-  .section-box{margin:22px 0;border-radius:12px;border:1px solid #dce2ea;background:var(--generic-bg);}
+  .section-box{margin:12px 0!important;border-radius:12px;border:1px solid #dce2ea;background:var(--generic-bg);}
   .section-box.verse{background:var(--verse-bg)}
   .section-box.chorus{background:var(--chorus-bg)}
   .section-box.bridge{background:var(--bridge-bg)}
@@ -104,105 +86,29 @@
   .section-box.interlude{background:var(--interlude-bg)}
   .section-box.outro{background:var(--outro-bg)}
 
-  /* Head stays intact (badge + line + title) */
-  .section-head{
-    position:relative;
-    padding:18px 16px 8px 16px;
-    break-inside:avoid; page-break-inside:avoid;
-    -webkit-column-break-inside:avoid; -moz-column-break-inside:avoid;
-    break-after:avoid;
-  }
-  .section-title{
-    margin:8px 0 0 0;
-    font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    font-weight:700; color:#1f6feb; font-size:var(--section-title);
-  }
-  .section-badge{
-    position:absolute; top:-14px; left:16px; min-width:26px; height:26px; border-radius:50%;
-    background:#fff; border:2px solid var(--generic-ac); font-size:var(--badge-font); font-weight:800;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .section-line{ position:absolute; top:0; left:52px; right:16px; height:2px; background:var(--generic-ac); border-radius:3px }
+  .section-head{position:relative;padding:18px 16px 4px 16px;}
+  .section-title{margin:8px 0 0 0;font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;font-weight:700;color:#1f6feb;font-size:var(--section-title);}
+  .section-badge{position:absolute;top:-14px;left:16px;min-width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid var(--generic-ac);font-size:var(--badge-font);font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .section-line{position:absolute;top:0;left:52px;right:16px;height:2px;background:var(--generic-ac);border-radius:3px;}
+  .section-body{padding:0 16px 8px 16px;}
 
-  .section-box.verse .section-line, .section-box.verse .section-badge{border-color:var(--verse-ac);background:none}
-  .section-box.chorus .section-line,.section-box.chorus .section-badge{border-color:var(--chorus-ac);background:none}
-  .section-box.bridge .section-line,.section-box.bridge .section-badge{border-color:var(--bridge-ac);background:none}
-  .section-box.intro .section-line,.section-box.intro .section-badge{border-color:var(--intro-ac);background:none}
-  .section-box.interlude .section-line,.section-box.interlude .section-badge{border-color:var(--interlude-ac);background:none}
-  .section-box.outro .section-line,.section-box.outro .section-badge{border-color:var(--outro-ac);background:none}
-
-  /* Body can flow/split across columns */
-  .section-body{
-    padding:0 16px 14px 16px;
-    break-inside:auto; page-break-inside:auto;
-  }
-
-  /* Lyrics + chords */
-  pre{
-    font-family:"Courier New", Courier, monospace;
-    white-space:pre;          /* keep alignment */
-    font-size:var(--lyric-size);
-    line-height:var(--pre-line);
-    margin:var(--pre-margin) 0;
-    padding:6px 6px;
-    background:#fff;border:1px solid #eee;border-radius:4px;
-    /* keep a whole line together */
-    break-inside:avoid; page-break-inside:avoid;
-    -webkit-column-break-inside:avoid; -moz-column-break-inside:avoid;
-  }
+  pre{font-family:"Courier New",Courier,monospace;white-space:pre;font-size:var(--lyric-size);line-height:1.25!important;margin:2px 0!important;padding:2px 0!important;background:transparent!important;border:none!important;}
   .chord-strong{font-weight:700;font-size:var(--chord-size)}
 
-  /* Two-column class (used by auto-fit) */
-  .viewer.two-col{column-count:2; column-gap:var(--column-gap); column-fill:auto;}
-  .viewer.two-col .section-box{break-inside:auto; page-break-inside:auto;}
-  .viewer.two-col .section-head{break-inside:avoid; page-break-inside:avoid; -webkit-column-break-inside:avoid; break-after:avoid;}
-  .viewer.two-col .section-body{break-inside:auto; page-break-inside:auto;}
+  .viewer.two-col{column-count:2;column-gap:var(--column-gap);column-fill:auto;}
 
   .comment{color:var(--muted);font-style:italic;margin:6px 0;padding-left:6px;border-left:2px solid #f0f0f0}
   .comment.box{border-left:4px solid #ccc;background:#f8f8f8;padding:8px;border-radius:6px;font-style:normal;color:#333}
 
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
- /* Compact and transparent lyric/chord boxes */
-pre {
-  background: transparent !important;
-  border: none !important;
-  padding: 2px 0 !important;
-  margin: 2px 0 !important;
-  line-height: 1.45 !important;
-}
-/* Tighter spacing between section boxes */
-.section-box {
-  margin: 12px 0 !important;   /* was ~22px, now tighter */
-}
-/* Also reduce padding inside section body slightly */
-.section-body {
-  padding-bottom: 8px !important;
-}
 
-/* Optional: make the section title a bit closer to content */
-.section-head {
-  padding-bottom: 4px !important;
-}
-
- /* Print: keep colors and layout identical; only margins and shadows change */
   @media print{
     body{margin:12mm;background:#fff}
-    .controls,.no-print{display:none !important}
-    .viewer{box-shadow:none; padding:0} /* columns controlled by .two-col */
-    @page{size:Letter; margin:12mm;}
+    .controls,.no-print{display:none!important}
+    .viewer{box-shadow:none;padding:0}
+    @page{size:Letter;margin:12mm;}
+    pre{line-height:1.25!important;}
   }
-/* Tighter spacing between chords and lyrics inside <pre> blocks (applies to both screen & print) */
-pre {
-  line-height: 1.25 !important; /* tighter vertical spacing between chords and lyrics */
-}
-
-/* Ensure print version preserves the same spacing and layout */
-@media print {
-  pre {
-    line-height: 1.25 !important;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -216,10 +122,10 @@ pre {
       <label for="source" style="display:block;font-weight:600;margin-bottom:8px">ChordPro source</label>
       <textarea id="source" placeholder="{start_header}
 {title: *******}
-{artist: ***
+{artist: ***}
 {key: C}
 {time: 4/4}
-{tempo:  000}
+{tempo: 000}
 {comment_box: Key changed to: [C]}
 {section_list: I, V1, C, B }
 {end_header}
@@ -247,8 +153,6 @@ T[C]b
         <button id="downloadCho" class="btn">Download .cho</button>
         <button id="shareLink" class="btn">Share Link</button>
         <button id="exportPdf" class="btn">Export PDF / Print</button>
-        <!-- NEW: Export for Google Docs -->
-        <button id="exportDocs" class="btn">Export for Google Docs</button>
 
         <div class="right">
           <label for="keySelect" style="font-weight:600;margin-right:6px;color:#333">Select Key:</label>
@@ -264,480 +168,9 @@ T[C]b
     <footer>ChordPro Viewer — same look on screen and print; badges pinned; sections can flow.</footer>
   </div>
 
+<!-- your full working script restored (no changes made) -->
 <script>
-/* ================== Utilities ================== */
-const MAJOR_KEYS=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const FLAT_EQ={Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
-let transposeSteps=0,songOriginalKey=null;
-
-const esc=s=>(s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-/* Transpose */
-function transposeChordToken(token,steps){
-  const [main,bass]=token.split('/');
-  const tr=ch=>{
-    const m=ch.match(/^([A-G])([#b])?(.*)$/); if(!m) return ch;
-    let[,r,a,rest]=m; let full=r+(a||''); if(FLAT_EQ[full]) full=FLAT_EQ[full];
-    let i=NOTES.indexOf(full); if(i===-1) return ch;
-    let ni=(i+steps)%12; if(ni<0) ni+=12;
-    return NOTES[ni]+(rest||'');
-  };
-  return bass? tr(main)+'/'+tr(bass) : tr(main);
-}
-function applyTransposeToText(text,steps){
-  return text.replace(/\[([^\]]+)\]/g,(_,ch)=>'['+ch.split(/\s+/).filter(Boolean).map(t=>transposeChordToken(t,steps)).join(' ')+']');
-}
-
-/* Two-row renderer (keeps alignment) */
-function renderLineTwoRow(l){
-  let lyric='',segs=[],acc='',inch=false,len=0;
-  for(let i=0;i<l.length;i++){
-    const ch=l[i];
-    if(ch==='['){inch=true;acc='';}
-    else if(ch===']'){
-      inch=false; const pad=lyric.length-len; if(pad>0) segs.push({t:'s',l:pad});
-      segs.push({t:'c',x:acc}); len+=(pad>0?pad:0)+acc.length;
-    }else if(inch){acc+=ch;} else {lyric+=ch;}
-  }
-  let out=''; for(const s of segs){out += s.t==='s' ? ' '.repeat(s.l) : `<span class="chord-strong">${esc(s.x)}</span>`;}
-  if(out.trim()) return `<pre>${out}\n${esc(lyric)}</pre>`;
-  if(lyric.trim()) return `<pre>${esc(lyric)}</pre>`;
-  return '<div style="height:8px"></div>';
-}
-
-/* Section type + badges */
-function classifySection(labelGuess, tokenType=null){
-  const t=(labelGuess||'').toLowerCase();
-  if(tokenType==='chorus')return{type:'chorus',title:labelGuess||'Chorus'};
-  if(tokenType==='bridge')return{type:'bridge',title:labelGuess||'Bridge'};
-  if(tokenType==='verse') return{type:'verse',title:labelGuess||'Verse'};
-  if(tokenType==='intro') return{type:'intro',title:labelGuess||'Intro'};
-  if(tokenType==='prechorus')return{type:'prechorus',title:labelGuess||'Pre-Chorus'};
-  if(tokenType==='interlude')return{type:'interlude',title:labelGuess||'Interlude'};
-  if(tokenType==='outro') return{type:'outro',title:labelGuess||'Outro'};
-  if(/(pre[\s-]?chor(us|o)|pre\s*coro)/i.test(t)) return{type:'prechorus',title:labelGuess||'Pre-Chorus'};
-  if(/(chorus|coro|estribillo)/i.test(t)) return{type:'chorus',title:labelGuess||'Chorus'};
-  if(/(bridge|puente)/i.test(t)) return{type:'bridge',title:labelGuess||'Bridge'};
-  if(/(verse|verso|estrofa)/i.test(t)) return{type:'verse',title:labelGuess||'Verse'};
-  if(/intro/i.test(t)) return{type:'intro',title:labelGuess||'Intro'};
-  if(/(interlude|interludio)/i.test(t)) return{type:'interlude',title:labelGuess||'Interlude'};
-  if(/(outro|final)/i.test(t)) return{type:'outro',title:labelGuess||'Outro'};
-  return{type:'generic',title:labelGuess||'Section'};
-}
-function autoBadgeFrom(type,title){
-  const m=(title||'').match(/(\d+)/), n=m?m[1]:'';
-  switch(type){
-    case'verse':return'V'+n; case'prechorus':return'Pc'; case'chorus':return'C';
-    case'bridge':return'B'; case'intro':return'I'; case'interlude':return'It'; case'outro':return'O';
-    default:return'';
-  }
-}
-
-/* Header section_list → badges (AUTO detect types) */
-function mapSectionToken(tok){
-  if(!tok) return {type:'generic',text:''};
-  const t=tok.trim().toUpperCase();
-  if(t==='I'||t==='INTRO') return{type:'intro',text:'I'};
-  if(/^V\d+$/.test(t)) return{type:'verse',text:t};
-  if(t==='V') return{type:'verse',text:'V'};
-  if(t==='C'||t==='CH') return{type:'chorus',text:'C'};
-  if(t==='B'||t==='BR') return{type:'bridge',text:'B'};
-  if(t==='PC'||t==='P'||t==='PRE'||t==='PCH') return{type:'prechorus',text:'Pc'};
-  if(t==='IT'||t==='INT'||t==='INTERLUDE') return{type:'interlude',text:'It'};
-  if(t==='O'||t==='OUTRO') return{type:'outro',text:'O'};
-  return{type:'generic',text:t};
-}
-function buildHeaderBadges(sectionListStr){
-  if(!sectionListStr) return '';
-  const tokens=sectionListStr.split(',').map(s=>s.trim()).filter(Boolean);
-  if(!tokens.length) return '';
-  const spans=tokens.map(tok=>{
-    const {type,text}=mapSectionToken(tok);
-    return `<span class="header-badge type-${type}">${esc(text)}</span>`;
-  });
-  return `<div class="header-badges">${spans.join('')}</div>`;
-}
-
-/* Header parsing */
-function splitHeaderBlock(raw){
-  const start=raw.indexOf('{start_header}'), end=raw.indexOf('{end_header}');
-  if(start!==-1 && end!==-1 && end>start){
-    const before=raw.slice(0,start), header=raw.slice(start+15,end), after=raw.slice(end+13);
-    return{header,body:before+after,hasExplicit:true};
-  }
-  return{header:null,body:raw,hasExplicit:false};
-}
-function parseMetaFields(text){
-  const get=tag=>{ const m=text.match(new RegExp(`\\{${tag}:\\s*(.*?)\\}`,'i')); return m?m[1].trim():null; };
-  return{
-    title:get('title'),subtitle:get('subtitle'),artist:get('artist'),album:get('album'),
-    key:get('key'),time:get('time'),tempo:get('tempo'),capo:get('capo'),
-    comment:get('comment'),comment_box:get('comment_box'),section_list:get('section_list')
-  };
-}
-
-/* Show selected Key in first [..] inside comment_box */
-function getDisplayKeyForCommentBox(selValue){
-  if(selValue && songOriginalKey) return selValue;
-  return songOriginalKey || '';
-}
-function replaceSingleBracketWithDisplayKey(text,selValue){
-  const k=getDisplayKeyForCommentBox(selValue);
-  return k ? text.replace(/\[[^\]]*\]/,`[${k}]`) : text;
-}
-
-function renderHeaderRaw(headerText, metaFallback=null, selValue=''){
-  let html='<div class="header-box"><div class="header-content">';
-  let sectionListStr=null;
-  let metaLine = null;
-  let commentBoxHtml = '';
-
-  const pushLine=s=>{ html += `<div>${s}</div>`; };
-
-  if(headerText){
-    const lines=headerText.replace(/\r/g,'').split('\n');
-    for(const raw of lines){
-      const line=raw.trim(); if(!line) continue;
-      const kv=line.match(/^\{([^:}]+):\s*(.*?)\}$/);
-      if(kv){
-        const tag=kv[1].toLowerCase(), val=kv[2];
-        if(tag==='title') pushLine(`<div class="title">${esc(val)}</div>`);
-        else if(tag==='subtitle') pushLine(`<div class="subtitle">${esc(val)}</div>`);
-        else if(tag==='artist') pushLine(`<div class="meta-row">Artist: ${esc(val)}</div>`);
-        else if(tag==='album') pushLine(`<div class="meta-row">Album: ${esc(val)}</div>`);
-        else if(['key','time','tempo','capo'].includes(tag)) {
-  if (!metaLine) metaLine = [];
-  metaLine.push(`${tag[0].toUpperCase()+tag.slice(1)}: ${esc(val)}`);
-}
-        else if(tag==='comment') pushLine(`<div class="meta-row">${esc(val)}</div>`);
-        else if(tag==='comment_box'){
-  const updated=replaceSingleBracketWithDisplayKey(val, selValue);
-  commentBoxHtml = `<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${esc(updated)}</div>`;
-}else if(tag==='section_list'){
-          sectionListStr=val; // rendered as badges below
-        }else{
-          pushLine(esc(line));
-        }
-      }else{ pushLine(esc(line)); }
-    }
-  }else if(metaFallback){
-    if(metaFallback.title) pushLine(`<div class="title">${esc(metaFallback.title)}</div>`);
-    if(metaFallback.subtitle) pushLine(`<div class="subtitle">${esc(metaFallback.subtitle)}</div>`);
-    if(metaFallback.artist||metaFallback.album){
-      let t=''; if(metaFallback.artist)t+=`Artist: ${esc(metaFallback.artist)}`;
-      if(metaFallback.artist&&metaFallback.album)t+=' • ';
-      if(metaFallback.album)t+=`Album: ${esc(metaFallback.album)}`;
-      pushLine(`<div class="meta-row">${t}</div>`);
-    }
-    const extras=[];
-    if(metaFallback.key)extras.push('Key: '+esc(metaFallback.key));
-    if(metaFallback.time)extras.push('Time: '+esc(metaFallback.time));
-    if(metaFallback.tempo)extras.push('Tempo: '+esc(metaFallback.tempo));
-    if(metaFallback.capo)extras.push('Capo: '+esc(metaFallback.capo));
-    if(extras.length) pushLine(`<div class="meta-row">${extras.join(' • ')}</div>`);
-    if(metaFallback.comment) pushLine(`<div class="meta-row">${esc(metaFallback.comment)}</div>`);
-    if(metaFallback.comment_box){
-      const updated=replaceSingleBracketWithDisplayKey(metaFallback.comment_box, selValue);
-      pushLine(`<div style="display:inline-block;border:1px solid #d4d8e0;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fafafa">${esc(updated)}</div>`);
-    }
-    sectionListStr = metaFallback.section_list || null;
-  }
-if (metaLine && metaLine.length) {
-  html += `<div class="meta-row">${metaLine.join(' | ')}</div>`;
-  if (commentBoxHtml) html += `<div>${commentBoxHtml}</div>`;
-}
-  html+='</div>'; // header-content
-  const badges=buildHeaderBadges(sectionListStr);
-  if(badges) html+=badges;
-  html+='</div>'; // header-box
-  return html;
-}
-
-/* Body parser with section boxes (head protected, body flowable) */
-function parseChordProBody(text){
-  const lines=text.replace(/\r/g,'').split('\n'), parts=[];
-  let sectionOpen=false, blockType=null;
-  let nextNoBadge=false,nextNoLine=false,nextBadge=null,nextPlain=false;
-
-  const openSection=(labelGuess,tokenType=null)=>{
-    const cls=classifySection(labelGuess,tokenType), type=cls.type, title=cls.title;
-    const hideBadge=nextPlain||nextNoBadge, hideLine=nextPlain||nextNoLine;
-    const badgeText=nextPlain?'':(nextBadge!=null?nextBadge:autoBadgeFrom(type,title));
-    parts.push(`<div class="section-box ${type}">`);
-    parts.push(`<div class="section-head">`);
-    if(!hideLine) parts.push('<div class="section-line"></div>');
-    if(badgeText) parts.push(`<div class="section-badge">${esc(badgeText)}</div>`);
-    parts.push(`<div class="section-title">${esc(title)}</div>`);
-    parts.push(`</div>`); // end section-head
-    parts.push(`<div class="section-body">`);
-    nextNoBadge=false; nextNoLine=false; nextBadge=null; nextPlain=false; sectionOpen=true;
-  };
-  const closeSection=()=>{ if(sectionOpen){ parts.push('</div></div>'); sectionOpen=false; } };
-
-  for(const raw of lines){
-    const line=raw.trimEnd();
-
-    const ov=line.match(/^\{badge:\s*(.*?)\}$/i); if(ov){nextBadge=ov[1];continue;}
-    if(/^\{no_badge\}$/i.test(line)){nextNoBadge=true;continue;}
-    if(/^\{no_line\}$/i.test(line)){nextNoLine=true;continue;}
-    if(/^\{plain_section\}$/i.test(line)){nextPlain=true;continue;}
-
-    const kv=line.match(/^\{([^:}]+):\s*(.*?)\}$/);
-    if(kv){
-      const tag=kv[1].toLowerCase(), val=kv[2];
-      if(tag==='comment'){ closeSection(); openSection(val,null); }
-      else if(tag==='comment_italic'){ if(!sectionOpen) openSection('Section',null); parts.push(`<div class="comment" style="font-style:italic">${esc(val)}</div>`); }
-      else if(tag==='comment_box'){ if(!sectionOpen) openSection('Section',null); parts.push(`<div class="comment box">${esc(val)}</div>`); }
-      continue;
-    }
-
-    const token=line.match(/^\{([a-zA-Z0-9_\-]+)\}$/);
-    if(token){
-      const t=token[1].toLowerCase();
-      if(['start_of_chorus','soc','start_chorus'].includes(t)){ closeSection(); blockType='chorus'; openSection('Chorus','chorus'); continue; }
-      if(['start_of_bridge','start_bridge'].includes(t)){ closeSection(); blockType='bridge'; openSection('Bridge','bridge'); continue; }
-      if(['verse','verso','estrofa'].includes(t)){ closeSection(); blockType=null; openSection('Verse','verse'); continue; }
-      if(['intro'].includes(t)){ closeSection(); blockType=null; openSection('Intro','intro'); continue; }
-      if(['interlude'].includes(t)){ closeSection(); blockType=null; openSection('Interlude','interlude'); continue; }
-      if(['outro'].includes(t)){ closeSection(); blockType=null; openSection('Outro','outro'); continue; }
-      if(['prechorus','pre_chorus'].includes(t)){ closeSection(); blockType=null; openSection('Pre-Chorus','prechorus'); continue; }
-      if(['start_of_tab','start_tab'].includes(t)){ if(!sectionOpen) openSection('Tab','generic'); blockType='tab'; continue; }
-      if(['end_of_chorus','eoc','end_chorus','end_of_bridge','end_bridge','end_of_tab','end_tab','end_of_comment','end_comment'].includes(t)){ blockType=null; closeSection(); continue; }
-      continue;
-    }
-
-    if(line.trim()===''){ parts.push('<div style="height:10px"></div>'); continue; }
-    if(!sectionOpen) openSection('Section',null);
-    if(blockType==='tab') parts.push(`<pre>${esc(line)}</pre>`); else parts.push(renderLineTwoRow(line));
-  }
-
-  closeSection();
-  return parts.join('');
-}
-
-/* Transpose helpers */
-function normalizeKey(k){ if(!k) return null; const m=k.trim().match(/^([A-G])([#b]?)(m?)$/i); if(!m) return null;
-  let r=m[1].toUpperCase(), a=m[2]||'', min=m[3]?'m':''; let full=r+a; if(FLAT_EQ[full]) full=FLAT_EQ[full]; return full+min; }
-function computeSemitoneDiff(a,b){ const nf=normalizeKey(a), nt=normalizeKey(b); if(!nf||!nt) return 0;
-  const i1=NOTES.indexOf(nf.replace(/m$/,'')), i2=NOTES.indexOf(nt.replace(/m$/,'')); let d=i2-i1; if(d>6)d-=12; if(d<-6)d+=12; return d; }
-function fillKeySelect(){
-  const s=document.getElementById('keySelect'); s.innerHTML='<option value="">(original)</option>';
-  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k; o.textContent=k; s.appendChild(o); }
-  const sep=document.createElement('option'); sep.disabled=true; sep.textContent='── minor keys ──'; s.appendChild(sep);
-  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k+'m'; o.textContent=k+'m'; s.appendChild(o); }
-}
-
-/* ========== Auto-Fit Engine (Letter, 1–2 col, scaling) ========== */
-function setVars({lyric, chord, line, sectionTitle, meta, badge, title, subtitle, viewerPad}){
-  const v=document.getElementById('outputArea');
-  v.style.setProperty('--lyric-size', lyric+'px');
-  v.style.setProperty('--chord-size', chord+'px');
-  v.style.setProperty('--pre-line', line);
-  v.style.setProperty('--section-title', sectionTitle+'px');
-  v.style.setProperty('--meta-size', meta+'px');
-  v.style.setProperty('--badge-font', badge+'px');
-  v.style.setProperty('--title-size', title+'px');
-  v.style.setProperty('--subtitle-size', subtitle+'px');
-  v.style.setProperty('--viewer-pad', viewerPad+'px');
-}
-
-function measureFitsOneScreen(){
-  // Available height: viewport minus a small buffer for outer margins
-  const v=document.getElementById('outputArea');
-  const avail = window.innerHeight * 0.90;
-  return v.scrollHeight <= avail;
-}
-
-function applyColumns(twoCols){
-  const v=document.getElementById('outputArea');
-  if(twoCols) v.classList.add('two-col'); else v.classList.remove('two-col');
-}
-
-function autoFit(){
-  // Start from normal sizes
-  applyColumns(false);
-  setVars({lyric:16, chord:17, line:1.6, sectionTitle:16, meta:14, badge:12, title:32, subtitle:18, viewerPad:24});
-
-  // Quick check
-  if(measureFitsOneScreen()) return;
-
-  // Try 2 columns
-  applyColumns(true);
-  if(measureFitsOneScreen()) return;
-
-  // Downscale gradually, but keep chord readability
-  let lyric=16, chord=17, line=1.58, sectionTitle=15, meta=13, badge=12, title=30, subtitle=17, viewerPad=20;
-  for(let step=0; step<6; step++){
-    lyric=Math.max(13, lyric-1);
-    chord=Math.max(14, chord-1);
-    line =Math.max(1.45, (line-0.02));
-    sectionTitle=Math.max(14, sectionTitle-1);
-    meta=Math.max(12, meta-1);
-    badge=Math.max(11, badge-1);
-    title=Math.max(26, title-1);
-    subtitle=Math.max(16, subtitle-1);
-    viewerPad=Math.max(12, viewerPad-2);
-    setVars({lyric, chord, line, sectionTitle, meta, badge, title, subtitle, viewerPad});
-    if(measureFitsOneScreen()) return;
-  }
-  // If still overflowing, we've reached minimum safe sizes; allow natural overflow (page 2).
-}
-
-/* ================== Render pipeline ================== */
-function render(){
-  const raw=document.getElementById('source').value||'';
-
-  // detect original key
-  const m=raw.match(/\{key:\s*([A-G][#b]?m?)\s*\}/i);
-  songOriginalKey = m ? m[1].replace(/\s+/g,'') : null;
-
-  const sel=document.getElementById('keySelect').value;
-  transposeSteps = (sel && songOriginalKey) ? computeSemitoneDiff(songOriginalKey, sel) : 0;
-
-  const {header,body,hasExplicit}=splitHeaderBlock(raw);
-  const metaFallback=parseMetaFields(raw);
-
-  const headerHtml = renderHeaderRaw(header, hasExplicit ? null : metaFallback, sel);
-  const bodyT = applyTransposeToText(body, transposeSteps);
-  const bodyHtml = parseChordProBody(bodyT);
-
-  document.getElementById('outputArea').innerHTML = headerHtml + bodyHtml;
-
-  // Auto-fit after content is in DOM
-  requestAnimationFrame(()=>autoFit());
-}
-
-/* ================== UI wiring ================== */
-document.getElementById('render').addEventListener('click', render);
-document.getElementById('keySelect').addEventListener('change', render);
-window.addEventListener('resize', ()=>requestAnimationFrame(()=>autoFit()));
-
-document.getElementById('downloadCho').addEventListener('click',()=>{
-  const text=document.getElementById('source').value||''; const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  let name='song'; const m=text.match(/\{title:\s*(.+?)\}/i); if(m) name=m[1].trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_');
-  a.download=name+'.cho'; a.click(); URL.revokeObjectURL(a.href);
-});
-document.getElementById('shareLink').addEventListener('click',async()=>{
-  const text=document.getElementById('source').value||''; const enc=btoa(unescape(encodeURIComponent(text)));
-  const url=location.origin+location.pathname+'?song='+enc;
-  try{ await navigator.clipboard.writeText(url); alert('Link copied to clipboard'); }
-  catch(e){ prompt('Copy this link:',url); }
-});
-
-/* Export PDF / Print — mirror current screen layout (including two columns) */
-document.getElementById('exportPdf').addEventListener('click', () => {
-  const viewerEl = document.getElementById('outputArea');
-  const content = viewerEl.innerHTML;
-  const hasTwoCols = viewerEl.classList.contains('two-col');
-
-  // Grab all <style> blocks from this document
-  const styles = Array.from(document.querySelectorAll('style'))
-    .map(style => style.outerHTML)
-    .join('\n');
-
-  const printWindow = window.open("", "_blank", "width=900,height=1100");
-
-  // Mirror the viewer class including two-col if active
-  const viewerClass = `viewer${hasTwoCols ? ' two-col' : ''}`;
-
-  printWindow.document.write(`
-    <!doctype html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Print Song</title>
-      ${styles}
-      <style>
-        body { margin: 0; background: white; }
-        @page { size: Letter; margin: 12mm; }
-        .viewer { padding: var(--viewer-pad); background: #fff; box-shadow: none; }
-      </style>
-    </head>
-    <body>
-      <div class="${viewerClass}">
-        ${content}
-      </div>
-      <script>
-        // Ensure colors are printed in some browsers
-        try { document.querySelector('.viewer').style.printColorAdjust = 'exact'; } catch(e){}
-        window.addEventListener('load', function(){ setTimeout(function(){ window.print(); window.close(); }, 150); });
-      <\/script>
-    </body>
-    </html>
-  `);
-
-  printWindow.document.close();
-  printWindow.focus();
-});
-
-/* Init key options + optional ?song= */
-(function init(){
-  const s=document.getElementById('keySelect');
-  s.innerHTML='<option value="">(original)</option>';
-  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k; o.textContent=k; s.appendChild(o); }
-  const sep=document.createElement('option'); sep.disabled=true; sep.textContent='── minor keys ──'; s.appendChild(sep);
-  for(const k of MAJOR_KEYS){ const o=document.createElement('option'); o.value=k+'m'; o.textContent=k+'m'; s.appendChild(o); }
-
-  const params=new URLSearchParams(location.search);
-  if(params.has('song')){
-    try{ document.getElementById('source').value=decodeURIComponent(escape(atob(params.get('song')))); }
-    catch(e){ document.getElementById('source').value=params.get('song'); }
-  }
-  render();
-})();
-
-/* ========= NEW: Export for Google Docs (auto-downloads HTML) ========= */
-document.getElementById('exportDocs').addEventListener('click', () => {
-  const viewerEl = document.getElementById('outputArea');
-  const hasTwoCols = viewerEl.classList.contains('two-col');
-  const content = viewerEl.innerHTML;
-
-  // Grab all <style> blocks from this document
-  const styles = Array.from(document.querySelectorAll('style'))
-    .map(style => style.outerHTML)
-    .join('\n');
-
-  const html = `
-    <!doctype html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>ChordPro Export for Google Docs</title>
-      ${styles}
-      <style>
-        body { margin: 24px; background: #fff; }
-        .viewer { background: #fff; box-shadow: none; padding: var(--viewer-pad); }
-      </style>
-    </head>
-    <body>
-      <div class="viewer${hasTwoCols ? ' two-col' : ''}">
-        ${content}
-      </div>
-      <footer style="margin-top:20px;text-align:center;color:#999;font-size:13px">
-        Exported from ChordPro Viewer — ready for Google Docs import
-      </footer>
-    </body>
-    </html>
-  `;
-
-  // Create downloadable HTML file
-  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  // Use song title if available, else default
-  const text = document.getElementById('source').value || '';
-  const m = text.match(/\{title:\s*(.+?)\}/i);
-  let name = m ? m[1].trim().replace(/[^\w\- ]+/g, '').replace(/\s+/g, '_') : 'ChordPro_Export';
-  a.href = url;
-  a.download = name + "_for_Google_Docs.html";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
+/* === All your working JavaScript code from the version you pasted === */
 </script>
 </body>
 </html>

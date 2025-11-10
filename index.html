@@ -688,7 +688,7 @@ document.getElementById('exportPdf').addEventListener('click', () => {
   render();
 })();
 
-/* ========= NEW: Export for Google Docs (opens in new tab) ========= */
+/* ========= NEW: Export for Google Docs (auto-downloads HTML) ========= */
 document.getElementById('exportDocs').addEventListener('click', () => {
   const viewerEl = document.getElementById('outputArea');
   const hasTwoCols = viewerEl.classList.contains('two-col');
@@ -722,13 +722,21 @@ document.getElementById('exportDocs').addEventListener('click', () => {
     </html>
   `;
 
-  const newTab = window.open("", "_blank");
-  if (newTab) {
-    newTab.document.write(html);
-    newTab.document.close();
-  } else {
-    alert('Popup blocked. Please allow popups for this site to use Export for Google Docs.');
-  }
+  // Create downloadable HTML file
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  // Use song title if available, else default
+  const text = document.getElementById('source').value || '';
+  const m = text.match(/\{title:\s*(.+?)\}/i);
+  let name = m ? m[1].trim().replace(/[^\w\- ]+/g, '').replace(/\s+/g, '_') : 'ChordPro_Export';
+  a.href = url;
+  a.download = name + "_for_Google_Docs.html";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 </script>
 </body>

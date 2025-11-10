@@ -527,12 +527,24 @@ document.getElementById('downloadCho').addEventListener('click',()=>{
   if(m) name=m[1].trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_');
   a.download=name+'.cho'; a.click(); URL.revokeObjectURL(a.href);
 });
-document.getElementById('shareLink').addEventListener('click',async()=>{
-  const text=document.getElementById('source').value||'';
-  const enc=btoa(unescape(encodeURIComponent(text)));
-  const url=location.origin+location.pathname+'?song='+enc;
-  try{await navigator.clipboard.writeText(url);alert('Link copied to clipboard');}
-  catch(e){prompt('Copy this link:',url);}
+/* Share Link — works both standalone and inside iframes (Google Sites safe) */
+document.getElementById('shareLink').addEventListener('click', ()=>{
+  const text = document.getElementById('source').value || '';
+  const enc = btoa(unescape(encodeURIComponent(text)));
+  const url = location.origin + location.pathname + '?song=' + enc;
+
+  // Detect if viewer is running inside an iframe (e.g., Google Sites)
+  const inIframe = (window.self !== window.top);
+
+  if (inIframe) {
+    // Restricted context — show prompt instead of clipboard
+    prompt('Copy this link manually:', url);
+  } else {
+    // Direct GitHub Pages or full-window mode — try clipboard first
+    navigator.clipboard.writeText(url)
+      .then(()=>alert('Link copied to clipboard!'))
+      .catch(()=>prompt('Copy this link manually:', url));
+  }
 });
 
 /* Export PDF / Print */

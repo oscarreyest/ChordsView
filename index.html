@@ -268,24 +268,28 @@ function autoBadgeFrom(type,title){
     default:return'';
   }
 }
-
-/* Header badge mapping */
+/* Header section_list → badges (AUTO detect types) */
 function mapSectionToken(tok){
   if(!tok) return {type:'generic',text:''};
   const t=tok.trim().toUpperCase();
+
   if(t==='I'||t==='INTRO') return{type:'intro',text:'I'};
   if(/^V\d+$/.test(t)) return{type:'verse',text:t};
-  if(t==='V') return{type:'verse',text:'V'};
-  if(t==='C'||t==='CH') return{type:'chorus',text:'C'};
-  if(t==='B'||t==='BR') return{type:'bridge',text:'B'};
-  if(t==='PC'||t==='P'||t==='PRE'||t==='PCH') return{type:'prechorus',text:'Pc'};
+  if(t==='V'||t==='VERSE') return{type:'verse',text:'V'};
+  if(t==='C'||t==='CH'||t==='CHORUS') return{type:'chorus',text:'C'};
+  if(t==='B'||t==='BR'||t==='BRIDGE') return{type:'bridge',text:'B'};
+  if(t==='PC'||t==='P'||t==='PRE'||t==='PCH'||t==='PRECHORUS') return{type:'prechorus',text:'Pc'};
   if(t==='IT'||t==='INT'||t==='INTERLUDE') return{type:'interlude',text:'It'};
   if(t==='O'||t==='OUTRO') return{type:'outro',text:'O'};
+
+  // 🎵 New sections
   if(t==='M'||t==='MEDLEY') return{type:'medley',text:'M'};
-  if(t==='INST'||t==='INSTRUMENTAL') return{type:'instrumental',text:'Inst'};
+  if(t==='INST'||t==='INSTRUMENTAL'||t==='INSTR') return{type:'instrumental',text:'Inst'};
   if(t==='S'||t==='SOLO') return{type:'solo',text:'S'};
+
   return{type:'generic',text:t};
 }
+
 function buildHeaderBadges(sectionListStr){
   if(!sectionListStr) return '';
   const tokens=sectionListStr.split(',').map(s=>s.trim()).filter(Boolean);

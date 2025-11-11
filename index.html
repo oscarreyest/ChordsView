@@ -142,13 +142,18 @@ footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
   pre{line-height:1.25!important}
 }
 
-  @media print{
-    body{margin:12mm;background:#fff}
-    .controls,.no-print{display:none!important}
-    .viewer{box-shadow:none;padding:0}
-    @page{size:Letter;margin:12mm}
-    pre{line-height:1.25!important}
+ @media print{
+  body{margin:12mm;background:#fff}
+  .controls,.no-print{display:none!important}
+  .viewer{box-shadow:none;padding:0}
+  @page{size:Letter;margin:12mm}
+  pre{line-height:1.25!important}
+
+  /* Add extra space between columns in print mode */
+  .viewer.two-col {
+    column-gap:28mm !important;
   }
+}
 </style>
 </head>
 <body>

@@ -672,9 +672,9 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
     </head><body><div class="${viewerClass}">${content}</div>
     <script>try{document.querySelector('.viewer').style.printColorAdjust='exact';}catch(e){}
     window.addEventListener('load',()=>setTimeout(()=>{window.print();window.close();},150));<\/script>
-/*<div class="print-footer">
+/* <div class="print-footer">
   <p>© 2025 IB Nueva Esperanza RVA— Generated with Song Chart Creator (ORT)</p>
-</div>*/
+</div> */
     </body></html>`);
   printWindow.document.close(); printWindow.focus();
 });

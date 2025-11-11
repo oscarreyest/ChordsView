@@ -101,7 +101,7 @@
   margin-top: 12px !important;  /* space before every new section */
 }
 .section-box:last-of-type {
-  margin-bottom: 1px !important;  /* space after the final section */
+  margin-bottom: 8px !important;  /* space after the final section */
 }
 
 .section-box.verse {background:var(--verse-bg);}
@@ -476,7 +476,7 @@ function parseChordProBody(text){
       continue;
     }
 
-    if(line.trim()===''){ parts.push('<div style="height:10px"></div>'); continue; }
+    if(line.trim()===''){ continue; }
     if(!sectionOpen) openSection('Section',null);
     if(blockType==='tab') parts.push(`<pre>${esc(line)}</pre>`); else parts.push(renderLineTwoRow(line));
   }

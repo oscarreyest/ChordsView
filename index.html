@@ -669,6 +669,15 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
   if(params.has('song')){
     try{document.getElementById('source').value=decodeURIComponent(escape(atob(params.get('song'))));}
     catch(e){document.getElementById('source').value=params.get('song');}
+// If shared link contains ?view=, render directly as output
+if (params.has('view')) {
+  try {
+    const decoded = decodeURIComponent(escape(atob(params.get('view'))));
+    document.getElementById('outputArea').innerHTML = decoded;
+  } catch (e) {
+    console.error('Invalid shared view data');
+  }
+}
   }
   render();
 })();

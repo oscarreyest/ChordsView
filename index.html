@@ -204,17 +204,30 @@ footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
         ChordPro source
       </label>
 
-      <textarea id="source" placeholder="{title: Sample Song}
+      <textarea id="source" placeholder="{start_header}
+{title: Sample Song}
 {subtitle: Example layout for testing}
 {artist: Demo Band}
 {key: C}
-{section_list: I, V1, C, B, Inst, S, O}
+{time: 4/4}
+{tempo: 60}
+{capo: 0}
+{comment_box: Key changed to: [C]}
+{section_list: I, V1, C, B, Inst, S, O
+{end_header}
 
 {start_of_intro}
 [C] [F] [C] [G]
 {end_of_intro}
 
 {start_of_verse}
+[C] This is the [F] verse that tells a [C] story  
+And leads us [G] right along the way
+[C] Every [Am] word is here to [F] show  
+[G] The ChordPro [C] display
+{end_of_verse}
+
+{comment: Verse 2}
 [C] This is the [F] verse that tells a [C] story  
 And leads us [G] right along the way
 [C] Every [Am] word is here to [F] show  

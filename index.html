@@ -167,21 +167,6 @@ footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
   @page{size:Letter;margin:12mm}
   pre{line-height:1.25!important}
 
-  /* Printable footer at bottom of each printed page */
-  .print-footer {
-    display: block !important;
-    position: fixed;
-    bottom: 8mm;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 11px;
-    color: #666;
-    border-top: 1px solid #ccc;
-    padding-top: 4px;
-    background: white;
-  }
-
   /* Add extra space between columns in print mode */
   .viewer.two-col {
     column-gap:8mm !important;
@@ -672,9 +657,6 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
     </head><body><div class="${viewerClass}">${content}</div>
     <script>try{document.querySelector('.viewer').style.printColorAdjust='exact';}catch(e){}
     window.addEventListener('load',()=>setTimeout(()=>{window.print();window.close();},150));<\/script>
-/* <div class="print-footer">
-  <p>© 2025 IB Nueva Esperanza RVA— Generated with Song Chart Creator (ORT)</p>
-</div> */
     </body></html>`);
   printWindow.document.close(); printWindow.focus();
 });

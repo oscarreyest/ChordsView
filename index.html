@@ -657,57 +657,63 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
     </body></html>`);
   printWindow.document.close(); printWindow.focus();
 });
-
-/* Init */
+//* Init */
 (function init(){
   const s=document.getElementById('keySelect');
-  s.innerHTML='<option value="">(original)</option>';
-  for(const k of MAJOR_KEYS){
-    const o=document.createElement('option');o.value=k;o.textContent=k;
+  s.innerHTML = '<option value="">(original)</option>';
+  for (const k of MAJOR_KEYS) {
+    const o = document.createElement('option');
+    o.value = k;
+    o.textContent = k;
     s.appendChild(o);
   }
-  const sep=document.createElement('option');
-  sep.disabled=true;sep.textContent='── minor keys ──';
+  const sep = document.createElement('option');
+  sep.disabled = true;
+  sep.textContent = '── minor keys ──';
   s.appendChild(sep);
-  for(const k of MAJOR_KEYS){
-    const o=document.createElement('option');o.value=k+'m';o.textContent=k+'m';
+  for (const k of MAJOR_KEYS) {
+    const o = document.createElement('option');
+    o.value = k + 'm';
+    o.textContent = k + 'm';
     s.appendChild(o);
   }
 
   const params = new URLSearchParams(location.search);
 
-  // ✅ 1️⃣ If ?view= is present, load only the rendered output (hide editor)
+  // 1) VIEW-ONLY MODE: if URL has ?view=, show only the rendered output
   if (params.has('view')) {
     try {
       const decoded = decodeURIComponent(escape(atob(params.get('view'))));
-      document.getElementById('outputArea').innerHTML = decoded;
+      const out = document.getElementById('outputArea');
+      out.innerHTML = decoded;
 
-      // Hide editor UI for clean view-only mode
-      document.querySelector('.card').style.display = 'none';
+      // Hide editor UI so it doesn't look like the editing page
+      document.querySelector('.card').style.display = 'none'; // editor card
       document.querySelector('header').style.display = 'none';
       document.querySelector('footer').style.display = 'none';
 
-      // Optional: make viewer full width for clean screen layout
-      document.getElementById('outputArea').classList.remove('card');
-      document.getElementById('outputArea').style.boxShadow = 'none';
-      document.getElementById('outputArea').style.padding = '24px';
+      // Make the output look like a standalone viewer
+      out.classList.remove('card');
+      out.style.boxShadow = 'none';
+      out.style.padding = '24px';
       document.body.style.background = '#fff';
-
-      return; // ⛔ stop normal render logic
     } catch (e) {
-      console.error('Invalid shared view data');
+      console.error('Invalid shared view data', e);
     }
+    return; // ⛔ VERY IMPORTANT: don't call render() in view mode
   }
 
-  // ✅ 2️⃣ Normal editor + ?song= mode
+  // 2) NORMAL EDITOR MODE (+ optional ?song= support)
   if (params.has('song')) {
     try {
-      document.getElementById('source').value = decodeURIComponent(escape(atob(params.get('song'))));
+      document.getElementById('source').value =
+        decodeURIComponent(escape(atob(params.get('song'))));
     } catch (e) {
       document.getElementById('source').value = params.get('song');
     }
   }
 
+  // Render from whatever is in the textarea (default or loaded)
   render();
 })();
 </script>

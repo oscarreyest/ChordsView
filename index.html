@@ -729,13 +729,21 @@ function drawGuitarChord(name, frets) {
 }
 
 // Extract chords from rendered output (HTML already parsed)
+// 🎵 Extract chords from rendered output (detects <span class="chord-strong"> tags)
 function extractChordsFromOutput() {
-  const text = document.getElementById('outputArea').innerText || '';
-  const matches = [...text.matchAll(/\[([A-G][#b]?(m|maj7|m7|7|sus2|sus4)?)\]/g)];
-  const chords = new Set(matches.map(m => m[1]));
+  const spans = document.querySelectorAll('#outputArea .chord-strong');
+  const chords = new Set();
+  spans.forEach(span => {
+    const raw = span.textContent.trim();
+    // Handle multi-chord tokens like "C G" inside one span
+    raw.split(/\s+/).forEach(ch => {
+      if (/^[A-G][#b]?(m|maj7|m7|7|sus2|sus4)?$/.test(ch)) {
+        chords.add(ch);
+      }
+    });
+  });
   return Array.from(chords);
 }
-
 // Render all detected guitar chord diagrams
 function renderChordLegend() {
   const legend = document.getElementById('chordLegend');

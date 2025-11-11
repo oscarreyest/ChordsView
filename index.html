@@ -89,11 +89,25 @@
   .header-badge.type-solo{border-color:var(--solo-ac)}
   .header-badge.type-generic{border-color:var(--generic-ac)}
 
-  .section-box{margin:10px 0!important;border-radius:12px;border:1px solid #dce2ea;
-    background:var(--generic-bg)}
-  .section-box.verse{background:var(--verse-bg)}
-  .section-box.chorus{background:var(--chorus-bg)}
-  .section-box.bridge{background:var(--bridge-bg)}
+  .section-box {
+  margin:12px 0!important;
+  border-radius:12px;
+  border:1px solid #dce2ea;
+  background:var(--generic-bg);
+}
+
+/* 🔧 Ensure uniform vertical spacing between all section boxes */
+.section-box + .section-box {
+  margin-top: 12px !important;  /* space before every new section */
+}
+.section-box:last-of-type {
+  margin-bottom: 12px !important;  /* space after the final section */
+}
+
+.section-box.verse {background:var(--verse-bg);}
+.section-box.chorus {background:var(--chorus-bg);}
+.section-box.bridge {background:var(--bridge-bg);}
+
   .section-box.intro{background:var(--intro-bg)}
   .section-box.interlude{background:var(--interlude-bg)}
   .section-box.outro{background:var(--outro-bg)}

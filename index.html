@@ -618,8 +618,20 @@ function render(){
   const headerHtml=renderHeaderRaw(header,hasExplicit?null:metaFallback,sel);
   const bodyT=applyTransposeToText(body,transposeSteps);
   const bodyHtml=parseChordProBody(bodyT);
-  document.getElementById('outputArea').innerHTML=headerHtml+bodyHtml;
-  requestAnimationFrame(()=>autoFit());
+  document.getElementById('outputArea').innerHTML = headerHtml + bodyHtml;
+
+// Run auto-fit and apply Safari column reflow fix
+requestAnimationFrame(()=>{
+  autoFit();
+
+  // 🧩 Safari fix for header jumping to bottom after re-render
+  if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
+    const viewer = document.getElementById('outputArea');
+    viewer.style.display = 'none';     // temporarily hide
+    void viewer.offsetHeight;          // force reflow
+    viewer.style.display = '';         // show again
+  }
+});
 }
 
 /* ================== UI wiring ================== */

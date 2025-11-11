@@ -127,6 +127,20 @@
   .comment{color:var(--muted);font-style:italic;margin:6px 0;padding-left:6px;border-left:2px solid #f0f0f0}
   .comment.box{border-left:4px solid #ccc;background:#f8f8f8;padding:8px;border-radius:6px;font-style:normal;color:#333}
   footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+
+/* Restore inner spacing for section bodies */
+.section-body {
+  padding: 0 16px 8px 16px !important;
+}
+
+@media print{
+  body{margin:12mm;background:#fff}
+  .controls,.no-print{display:none!important}
+  .viewer{box-shadow:none;padding:0}
+  @page{size:Letter;margin:12mm}
+  pre{line-height:1.25!important}
+}
 
   @media print{
     body{margin:12mm;background:#fff}

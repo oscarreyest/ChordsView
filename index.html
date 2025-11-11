@@ -613,10 +613,23 @@ function render(){
   songOriginalKey = m ? m[1].replace(/\s+/g,'') : null;
   const sel=document.getElementById('keySelect').value;
   transposeSteps=(sel&&songOriginalKey)?computeSemitoneDiff(songOriginalKey,sel):0;
+  // 🎸 Interactive Capo Transpose Logic
+  // Detect capo value (0–12) and apply downward semitone shift to lyric chords only
+  let capoShift = 0;
+  const capoMatch = raw.match(/\{capo:\s*(\d+)\s*\}/i);
+  if (capoMatch) {
+    const capoVal = parseInt(capoMatch[1], 10);
+    if (!isNaN(capoVal) && capoVal >= 0 && capoVal <= 12) capoShift = capoVal;
+  }
+
+  // Combine normal key transposition and capo offset:
+  // Chords are transposed by (key transpose - capo semitones)
+  const effectiveSteps = transposeSteps - capoShift;
+
   const {header,body,hasExplicit}=splitHeaderBlock(raw);
   const metaFallback=parseMetaFields(raw);
   const headerHtml=renderHeaderRaw(header,hasExplicit?null:metaFallback,sel);
-  const bodyT=applyTransposeToText(body,transposeSteps);
+  const bodyT=applyTransposeToText(body,effectiveSteps);
   const bodyHtml=parseChordProBody(bodyT);
   document.getElementById('outputArea').innerHTML = headerHtml + bodyHtml;
 

@@ -618,23 +618,23 @@ document.getElementById('downloadCho').addEventListener('click',()=>{
   if(m) name=m[1].trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_');
   a.download=name+'.cho'; a.click(); URL.revokeObjectURL(a.href);
 });
-/* Share Link — works both standalone and inside iframes (Google Sites safe) */
+/* Share Link — now shares only the rendered output (screen display) */
 document.getElementById('shareLink').addEventListener('click', ()=>{
-  const text = document.getElementById('source').value || '';
-  const enc = btoa(unescape(encodeURIComponent(text)));
-  const url = location.origin + location.pathname + '?song=' + enc;
+  const rendered = document.getElementById('outputArea').innerHTML || '';
+  const enc = btoa(unescape(encodeURIComponent(rendered)));
+  const url = location.origin + location.pathname + '?view=' + enc;
 
   // Detect if viewer is running inside an iframe (e.g., Google Sites)
   const inIframe = (window.self !== window.top);
 
   if (inIframe) {
     // Restricted context — show prompt instead of clipboard
-    prompt('Copy this link manually:', url);
+    prompt('Copy this link manually (screen output only):', url);
   } else {
     // Direct GitHub Pages or full-window mode — try clipboard first
     navigator.clipboard.writeText(url)
-      .then(()=>alert('Link copied to clipboard!'))
-      .catch(()=>prompt('Copy this link manually:', url));
+      .then(()=>alert('Screen display link copied to clipboard!'))
+      .catch(()=>prompt('Copy this link manually (screen output only):', url));
   }
 });
 

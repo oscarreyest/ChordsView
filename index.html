@@ -167,6 +167,24 @@ footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
   .viewer.two-col {
     column-gap:8mm !important;
   }
+  /* 🔧 Fix badge clipping and offset in print preview */
+  .section-badge {
+    top: -10px !important;
+    transform: translateY(0) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ensure badges aren't cut off by section container */
+  .section-head {
+    overflow: visible !important;
+  }
+
+  /* Keep entire section boxes from splitting between columns/pages */
+  .section-box {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
 </style>
 </head>

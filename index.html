@@ -206,7 +206,13 @@ body.view-only #outputArea {
   padding:24px;
   border-radius:0;
 }
-
+.chord-legend {
+  border:1px solid #dce2ea;
+  border-radius:12px;
+  background:#fff;
+  text-align:center;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
 </style>
 </head>
 <body>
@@ -272,7 +278,10 @@ And leads us [G] right along the way
         <button id="downloadCho" class="btn">Download .cho</button>
         <button id="shareLink" class="btn">Share Link</button>
         <button id="exportPdf" class="btn">Export PDF / Print</button>
-
+<label style="font-weight:600;margin-left:8px;">
+       <input type="checkbox" id="showChordsToggle" style="margin-right:4px;">
+      Show Chords
+</label>
         <div class="right">
           <label for="keySelect" style="font-weight:600;margin-right:6px;color:#333">Select Key:</label>
           <select id="keySelect" aria-label="Transpose to key" title="Transpose to key">
@@ -283,6 +292,9 @@ And leads us [G] right along the way
     </div>
 
     <div id="outputArea" class="viewer card" aria-live="polite"></div>
+<div id="chordLegend" class="card" style="display:none; margin-top:12px; padding:12px;">
+  <!-- Chord diagrams will appear here -->
+</div>
 
     <footer>
       Song Chart Creator - Propiedad del Worship Team De la Iglesia Bautista Nueva Esperanza - Richmond, VA
@@ -657,6 +669,17 @@ requestAnimationFrame(()=>{
 
 /* ================== UI wiring ================== */
 document.getElementById('render').addEventListener('click',render);
+/* Toggle chord legend visibility */
+document.getElementById('showChordsToggle').addEventListener('change', function() {
+  const legend = document.getElementById('chordLegend');
+  if (this.checked) {
+    legend.style.display = 'block';
+    legend.innerHTML = '<em>Chord diagrams will appear here...</em>';
+  } else {
+    legend.style.display = 'none';
+    legend.innerHTML = '';
+  }
+});
 document.getElementById('keySelect').addEventListener('change',render);
 window.addEventListener('resize',()=>requestAnimationFrame(()=>autoFit()));
 

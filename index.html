@@ -635,25 +635,25 @@ document.getElementById('downloadCho').addEventListener('click',()=>{
   if(m) name=m[1].trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_');
   a.download=name+'.cho'; a.click(); URL.revokeObjectURL(a.href);
 });
-/* Share Link — now shares only the rendered output (screen display) */
+/* Share Link — works both standalone and inside iframes (Google Sites safe) */
 document.getElementById('shareLink').addEventListener('click', ()=>{
-  const rendered = document.getElementById('outputArea').innerHTML || '';
-  const enc = btoa(unescape(encodeURIComponent(rendered)));
+  const text = document.getElementById('source').value || '';
+  const enc = btoa(unescape(encodeURIComponent(text)));
+  const url = location.origin + location.pathname + '?song=' + enc;
 
-  // mode=view tells the page to go into viewer-only mode
-  const url = location.origin + location.pathname + '?mode=view&view=' + enc;
-
+  // Detect if viewer is running inside an iframe (e.g., Google Sites)
   const inIframe = (window.self !== window.top);
 
   if (inIframe) {
-    prompt('Copy this link manually (screen output only):', url);
+    // Restricted context — show prompt instead of clipboard
+    prompt('Copy this link manually:', url);
   } else {
+    // Direct GitHub Pages or full-window mode — try clipboard first
     navigator.clipboard.writeText(url)
-      .then(()=>alert('Screen display link copied to clipboard!'))
-      .catch(()=>prompt('Copy this link manually (screen output only):', url));
+      .then(()=>alert('Link copied to clipboard!'))
+      .catch(()=>prompt('Copy this link manually:', url));
   }
 });
-
 /* Export PDF / Print */
 document.getElementById('exportPdf').addEventListener('click',()=>{
   const viewerEl=document.getElementById('outputArea');
@@ -675,56 +675,35 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
 });
 /* Init */
 (function init(){
-  const s = document.getElementById('keySelect');
-  s.innerHTML = '<option value="">(original)</option>';
-  for (const k of MAJOR_KEYS) {
-    const o = document.createElement('option');
-    o.value = k;
-    o.textContent = k;
+  const s=document.getElementById('keySelect');
+  s.innerHTML='<option value="">(original)</option>';
+  for(const k of MAJOR_KEYS){
+    const o=document.createElement('option');
+    o.value=k; o.textContent=k;
     s.appendChild(o);
   }
-  const sep = document.createElement('option');
-  sep.disabled = true;
-  sep.textContent = '── minor keys ──';
+  const sep=document.createElement('option');
+  sep.disabled=true;
+  sep.textContent='── minor keys ──';
   s.appendChild(sep);
-  for (const k of MAJOR_KEYS) {
-    const o = document.createElement('option');
-    o.value = k + 'm';
-    o.textContent = k + 'm';
+  for(const k of MAJOR_KEYS){
+    const o=document.createElement('option');
+    o.value=k+'m'; o.textContent=k+'m';
     s.appendChild(o);
   }
 
-  const params = new URLSearchParams(location.search);
-  const mode = params.get('mode');
-
-  // 🔹 VIEW-ONLY MODE (used by the shared link)
-  if (mode === 'view' && params.has('view')) {
-    try {
-      const decoded = decodeURIComponent(escape(atob(params.get('view'))));
-      document.getElementById('outputArea').innerHTML = decoded;
-
-      // Switch to view-only layout
-      document.body.classList.add('view-only');
-    } catch (e) {
-      console.error('Invalid shared view data', e);
-    }
-    return; // ⛔ IMPORTANT: don't render the default example in this mode
-  }
-
-  // 🔹 NORMAL EDITOR MODE (optional ?song= support)
-  if (params.has('song')) {
+  const params=new URLSearchParams(location.search);
+  if(params.has('song')){
     try {
       document.getElementById('source').value =
         decodeURIComponent(escape(atob(params.get('song'))));
-    } catch (e) {
+    } catch(e) {
       document.getElementById('source').value = params.get('song');
     }
   }
 
-  // Render whatever is currently in the textarea
   render();
 })();
-
 </script>
 </body>
 </html>

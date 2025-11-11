@@ -288,6 +288,14 @@ And leads us [G] right along the way
        <input type="checkbox" id="showChordsToggle" style="margin-right:4px;">
       Show Chords
 </label>
+<label style="font-weight:600;margin-left:10px;">
+  View:
+  <select id="chordViewSelect" style="margin-left:4px;padding:4px;border-radius:6px;border:1px solid #ccc;">
+    <option value="guitar" selected>Guitar</option>
+    <option value="keyboard">Keyboard</option>
+    <option value="both">Both</option>
+  </select>
+</label>
         <div class="right">
           <label for="keySelect" style="font-weight:600;margin-right:6px;color:#333">Select Key:</label>
           <select id="keySelect" aria-label="Transpose to key" title="Transpose to key">
@@ -350,67 +358,126 @@ function renderLineTwoRow(l){
 }
 
 /* Section type + badges */
-function classifySection(labelGuess, tokenType=null){
-  const t=(labelGuess||'').toLowerCase();
-  if(tokenType==='chorus')return{type:'chorus',title:labelGuess||'Chorus'};
-  if(tokenType==='bridge')return{type:'bridge',title:labelGuess||'Bridge'};
-  if(tokenType==='verse') return{type:'verse',title:labelGuess||'Verse'};
-  if(tokenType==='intro') return{type:'intro',title:labelGuess||'Intro'};
-  if(tokenType==='prechorus')return{type:'prechorus',title:labelGuess||'Pre-Chorus'};
-  if(tokenType==='interlude')return{type:'interlude',title:labelGuess||'Interlude'};
-  if(tokenType==='outro') return{type:'outro',title:labelGuess||'Outro'};
-  if(tokenType==='medley') return{type:'medley',title:labelGuess||'Medley'};
-  if(tokenType==='instrumental') return{type:'instrumental',title:labelGuess||'Instrumental'};
-  if(tokenType==='solo') return{type:'solo',title:labelGuess||'Solo'};
-  if(/(medley)/i.test(t)) return{type:'medley',title:labelGuess||'Medley'};
-  if(/(instrumental)/i.test(t)) return{type:'instrumental',title:labelGuess||'Instrumental'};
-  if(/(solo)/i.test(t)) return{type:'solo',title:labelGuess||'Solo'};
-  if(/(pre[\s-]?chor(us|o)|pre\s*coro)/i.test(t)) return{type:'prechorus',title:labelGuess||'Pre-Chorus'};
-  if(/(chorus|coro|estribillo)/i.test(t)) return{type:'chorus',title:labelGuess||'Chorus'};
-  if(/(bridge|puente)/i.test(t)) return{type:'bridge',title:labelGuess||'Bridge'};
-  if(/(verse|verso|estrofa)/i.test(t)) return{type:'verse',title:labelGuess||'Verse'};
-  if(/intro/i.test(t)) return{type:'intro',title:labelGuess||'Intro'};
-  if(/(interlude|interludio)/i.test(t)) return{type:'interlude',title:labelGuess||'Interlude'};
-  if(/(outro|final)/i.test(t)) return{type:'outro',title:labelGuess||'Outro'};
-  return{type:'generic',title:labelGuess||'Section'};
+function classifySection(labelGuess, tokenType = null) {
+  const t = (labelGuess || '').trim().toLowerCase();
+  const numMatch = t.match(/(\d+)/);
+  const num = numMatch ? ` ${numMatch[1]}` : '';
+
+  // English + Spanish mappings
+  const map = {
+    verse: 'Verse',
+    verso: 'Verso',
+    estrofa: 'Verso',
+    prechorus: 'Pre-Chorus',
+    precoro: 'Pre-Coro',
+    chorus: 'Chorus',
+    coro: 'Coro',
+    bridge: 'Bridge',
+    puente: 'Puente',
+    intro: 'Intro',
+    interlude: 'Interlude',
+    interludio: 'Interludio',
+    outro: 'Outro',
+    final: 'Final',
+    medley: 'Medley',
+    instrumental: 'Instrumental',
+    instr: 'Instrumental',
+    solo: 'Solo'
+  };
+
+  // If tag (tokenType) is provided, use that as main type
+  if (tokenType && map[tokenType]) {
+    return { type: tokenType, title: map[tokenType] + num };
+  }
+
+  // Try to detect from the text
+  for (const key in map) {
+    if (t.includes(key)) {
+      return { type: key, title: map[key] + num };
+    }
+  }
+
+  // Fallback generic
+  return { type: 'generic', title: (labelGuess || 'Section') + num };
 }
-function autoBadgeFrom(type,title){
-  const m=(title||'').match(/(\d+)/), n=m?m[1]:'';
-  switch(type){
-    case'verse':return'V'+n;
-    case'prechorus':return'Pc';
-    case'chorus':return'C';
-    case'bridge':return'B';
-    case'intro':return'I';
-    case'interlude':return'It';
-    case'outro':return'O';
-    case'medley':return'M';
-    case'instrumental':return'Inst';
-    case'solo':return'S';
-    default:return'';
+function autoBadgeFrom(type, title) {
+  const m = (title || '').match(/(\d+)/);
+  const n = m ? m[1] : '';
+
+  switch (type) {
+    case 'verse':
+    case 'verso':
+    case 'estrofa':        return 'V' + (n || '');
+    case 'prechorus':
+    case 'precoro':        return 'Pc' + (n || '');
+    case 'chorus':
+    case 'coro':           return 'C' + (n || '');
+    case 'bridge':
+    case 'puente':         return 'B' + (n || '');
+    case 'intro':          return 'I' + (n || '');
+    case 'interlude':
+    case 'interludio':     return 'It' + (n || '');
+    case 'outro':
+    case 'final':          return 'O' + (n || '');
+    case 'medley':         return 'M' + (n || '');
+    case 'instrumental':
+    case 'instr':          return 'Inst' + (n || '');
+    case 'solo':           return 'S' + (n || '');
+    default:               return '';
   }
 }
 /* Header section_list → badges (AUTO detect types) */
-function mapSectionToken(tok){
-  if(!tok) return {type:'generic',text:''};
-  const t=tok.trim().toUpperCase();
+function mapSectionToken(tok) {
+  if (!tok) return { type: 'generic', text: '' };
 
-  if(t==='I'||t==='INTRO') return{type:'intro',text:'I'};
-  if(/^V\d+$/.test(t)) return{type:'verse',text:t};
-  if(t==='V'||t==='VERSE') return{type:'verse',text:'V'};
-  if(t==='C'||t==='CH'||t==='CHORUS') return{type:'chorus',text:'C'};
-  if(t==='B'||t==='BR'||t==='BRIDGE') return{type:'bridge',text:'B'};
-  if(t==='PC'||t==='P'||t==='PRE'||t==='PCH'||t==='PRECHORUS') return{type:'prechorus',text:'Pc'};
-  if(t==='IT'||t==='INT'||t==='INTERLUDE') return{type:'interlude',text:'It'};
-  if(t==='O'||t==='OUTRO') return{type:'outro',text:'O'};
+  const t = tok.trim().toUpperCase();
 
-  // 🎵 New sections
-  if(t==='M'||t==='MEDLEY') return{type:'medley',text:'M'};
-  if(t==='INST'||t==='INSTRUMENTAL'||t==='INSTR') return{type:'instrumental',text:'Inst'};
-  if(t==='S'||t==='SOLO') return{type:'solo',text:'S'};
+  // Detect number (e.g., "C2", "CORO 2", "VERSE 1")
+  const numMatch = t.match(/(\d+)/);
+  const num = numMatch ? numMatch[1] : '';
 
-  return{type:'generic',text:t};
+  // Normalize words without numbers for matching
+  const base = t.replace(/\d+/g, '').trim();
+
+  // Map English + Spanish section types
+  const map = {
+    I: 'intro', INTRO: 'intro',
+    V: 'verse', VERSE: 'verse', VERSO: 'verse', ESTROFA: 'verse',
+    PC: 'prechorus', PCH: 'prechorus', PRECHORUS: 'prechorus', PRECORO: 'prechorus',
+    C: 'chorus', CH: 'chorus', CHORUS: 'chorus', CORO: 'chorus',
+    B: 'bridge', BR: 'bridge', BRIDGE: 'bridge', PUENTE: 'bridge',
+    IT: 'interlude', INTERLUDE: 'interlude', INTERLUDIO: 'interlude',
+    O: 'outro', OUTRO: 'outro', FINAL: 'outro',
+    M: 'medley', MEDLEY: 'medley',
+    INST: 'instrumental', INSTRUMENTAL: 'instrumental', INSTR: 'instrumental',
+    S: 'solo', SOLO: 'solo'
+  };
+
+  // Determine section type
+  let type = 'generic';
+  for (const key in map) {
+    if (base === key) { type = map[key]; break; }
+  }
+
+  // Badge text logic
+  let text = '';
+  switch (type) {
+    case 'verse': text = 'V' + (num || ''); break;
+    case 'prechorus': text = 'Pc' + (num || ''); break;
+    case 'chorus': text = 'C' + (num || ''); break;
+    case 'bridge': text = 'B' + (num || ''); break;
+    case 'intro': text = 'I' + (num || ''); break;
+    case 'interlude': text = 'It' + (num || ''); break;
+    case 'outro': text = 'O' + (num || ''); break;
+    case 'medley': text = 'M' + (num || ''); break;
+    case 'instrumental': text = 'Inst' + (num || ''); break;
+    case 'solo': text = 'S' + (num || ''); break;
+    default: text = base || '';
+  }
+
+  return { type, text };
 }
+
 
 function buildHeaderBadges(sectionListStr){
   if(!sectionListStr) return '';
@@ -441,12 +508,22 @@ function parseMetaFields(text){
   };
 }
 function getDisplayKeyForCommentBox(selValue){
-  if(selValue && songOriginalKey) return selValue;
+  // ✅ Always prefer selected key if it exists, else show original
+  if (selValue && selValue.trim() !== '') return selValue.trim();
   return songOriginalKey || '';
 }
-function replaceSingleBracketWithDisplayKey(text,selValue){
-  const k=getDisplayKeyForCommentBox(selValue);
-  return k ? text.replace(/\[[^\]]*\]/,`[${k}]`) : text;
+
+function replaceSingleBracketWithDisplayKey(text, selValue){
+  // ✅ Ensure the displayed key updates or adds automatically
+  const k = getDisplayKeyForCommentBox(selValue);
+  if (!k) return text;
+  if (/\[[^\]]*\]/.test(text)) {
+    // Replace existing [ ... ] content
+    return text.replace(/\[[^\]]*\]/, `[${k}]`);
+  } else {
+    // Add brackets if none exist
+    return `${text} [${k}]`;
+  }
 }
 function renderHeaderRaw(headerText, metaFallback=null, selValue=''){
   let html='<div class="header-box"><div class="header-content">';
@@ -464,9 +541,15 @@ function renderHeaderRaw(headerText, metaFallback=null, selValue=''){
         else if(tag==='artist') pushLine(`<div class="meta-row">Artist: ${esc(val)}</div>`);
         else if(tag==='album') pushLine(`<div class="meta-row">Album: ${esc(val)}</div>`);
         else if(['key','time','tempo','capo'].includes(tag)){
-          if(!metaLine) metaLine=[];
-          metaLine.push(`${tag[0].toUpperCase()+tag.slice(1)}: ${esc(val)}`);
-        } else if(tag==='comment') pushLine(`<div class="meta-row">${esc(val)}</div>`);
+  if(!metaLine) metaLine=[];
+  let displayVal = val;
+  // ✅ If this is the key line, update it to show the selected key (if transposed)
+  if (tag === 'key' && selValue && selValue.trim() !== '') {
+    displayVal = selValue;
+  }
+  metaLine.push(`${tag[0].toUpperCase()+tag.slice(1)}: ${esc(displayVal)}`);
+}
+else if(tag==='comment') pushLine(`<div class="meta-row">${esc(val)}</div>`);
         else if(tag==='comment_box'){
           const updated=replaceSingleBracketWithDisplayKey(val, selValue);
           commentBoxHtml=`<div style="display:inline-block;border:1px solid #d4d8e0;
@@ -545,25 +628,65 @@ function parseChordProBody(text){
       continue;
     }
 
-    const token=line.match(/^\{([a-zA-Z0-9_\-]+)\}$/);
-    if(token){
-      const t=token[1].toLowerCase();
-      if(['start_of_chorus','soc','start_chorus'].includes(t)){ closeSection(); blockType='chorus'; openSection('Chorus','chorus'); continue; }
-      if(['start_of_bridge','start_bridge'].includes(t)){ closeSection(); blockType='bridge'; openSection('Bridge','bridge'); continue; }
-      if(['verse','verso','estrofa'].includes(t)){ closeSection(); blockType=null; openSection('Verse','verse'); continue; }
-      if(['intro'].includes(t)){ closeSection(); blockType=null; openSection('Intro','intro'); continue; }
-      if(['interlude'].includes(t)){ closeSection(); blockType=null; openSection('Interlude','interlude'); continue; }
-      if(['outro'].includes(t)){ closeSection(); blockType=null; openSection('Outro','outro'); continue; }
-      if(['prechorus','pre_chorus'].includes(t)){ closeSection(); blockType=null; openSection('Pre-Chorus','prechorus'); continue; }
-      if(['start_of_medley','medley'].includes(t)){ closeSection(); blockType='medley'; openSection('Medley','medley'); continue; }
-      if(['start_of_instrumental','instrumental'].includes(t)){ closeSection(); blockType='instrumental'; openSection('Instrumental','instrumental'); continue; }
-      if(['start_of_solo','solo'].includes(t)){ closeSection(); blockType='solo'; openSection('Solo','solo'); continue; }
-      if(['start_of_tab','start_tab'].includes(t)){ if(!sectionOpen) openSection('Tab','generic'); blockType='tab'; continue; }
-      if(['end_of_chorus','eoc','end_chorus','end_of_bridge','end_bridge','end_of_tab','end_tab','end_of_medley','end_of_instrumental','end_of_solo'].includes(t)){
-        blockType=null; closeSection(); continue;
-      }
-      continue;
-    }
+ // 🎯 Improved section token handling (numbered + bilingual)
+const match = line.match(/^\{([a-zA-Z0-9_\-]+)(?:\s+(\d+))?\}$/);
+if (match) {
+  const t = match[1].toLowerCase();
+  const num = match[2] ? ` ${match[2]}` : '';
+
+  // === OPEN SECTION TYPES ===
+  if (['start_of_chorus','soc','start_chorus'].includes(t)) {
+    closeSection(); blockType='chorus'; openSection('Chorus' + num,'chorus'); continue;
+  }
+  if (['start_of_coro'].includes(t)) {
+    closeSection(); blockType='chorus'; openSection('Coro' + num,'chorus'); continue;
+  }
+  if (['start_of_bridge','start_bridge','start_of_puente'].includes(t)) {
+    closeSection(); blockType='bridge'; openSection('Bridge' + num,'bridge'); continue;
+  }
+  if (['start_of_verse','verse','verso','estrofa'].includes(t)) {
+    closeSection(); blockType='verse'; openSection('Verse' + num,'verse'); continue;
+  }
+  if (['start_of_intro','intro'].includes(t)) {
+    closeSection(); blockType='intro'; openSection('Intro' + num,'intro'); continue;
+  }
+  if (['start_of_interlude','interlude','interludio'].includes(t)) {
+    closeSection(); blockType='interlude'; openSection('Interlude' + num,'interlude'); continue;
+  }
+  if (['start_of_outro','outro','final'].includes(t)) {
+    closeSection(); blockType='outro'; openSection('Outro' + num,'outro'); continue;
+  }
+  if (['start_of_prechorus','prechorus','pre_chorus','precoro'].includes(t)) {
+    closeSection(); blockType='prechorus'; openSection('Pre-Chorus' + num,'prechorus'); continue;
+  }
+  if (['start_of_medley','medley'].includes(t)) {
+    closeSection(); blockType='medley'; openSection('Medley' + num,'medley'); continue;
+  }
+  if (['start_of_instrumental','instrumental','instr'].includes(t)) {
+    closeSection(); blockType='instrumental'; openSection('Instrumental' + num,'instrumental'); continue;
+  }
+  if (['start_of_solo','solo'].includes(t)) {
+    closeSection(); blockType='solo'; openSection('Solo' + num,'solo'); continue;
+  }
+  if (['start_of_tab','start_tab'].includes(t)) {
+    if(!sectionOpen) openSection('Tab' + num,'generic');
+    blockType='tab'; continue;
+  }
+
+  // === CLOSE SECTION TYPES ===
+  if ([
+    'end_of_chorus','eoc','end_chorus',
+    'end_of_bridge','end_bridge',
+    'end_of_tab','end_tab',
+    'end_of_medley',
+    'end_of_instrumental',
+    'end_of_solo'
+  ].includes(t)) {
+    blockType=null; closeSection(); continue;
+  }
+  continue;
+}
+
 
     if(line.trim()===''){ continue; }
     if(!sectionOpen) openSection('Section',null);
@@ -691,6 +814,7 @@ const GUITAR_CHORDS = {
   'E': [0,2,2,1,0,0],
   'E7': [0,2,0,1,0,0],
   'F': [1,3,3,2,1,1],
+  'F#': [2,4,4,3,2,2],
   'Fm': [1,3,3,1,1,1],
   'Am': ['x',0,2,2,1,0],
   'A#m': ['x',1,3,3,2,1],
@@ -701,6 +825,70 @@ const GUITAR_CHORDS = {
   'Bb': ['x',1,3,3,3,1],
   'Gm': [3,5,5,3,3,3]
 };
+/* ================== Keyboard Chord Diagrams ================== */
+function drawKeyboardChord(name, notes) {
+  const width = 120, height = 50;
+  const whiteKeys = ['C','D','E','F','G','A','B'];
+  const blackKeys = ['C#','D#',null,'F#','G#','A#',null];
+  const keyOrder = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // Draw white keys
+  whiteKeys.forEach((note, i)=>{
+    const x = i*(width/7);
+    svg += `<rect x="${x}" y="0" width="${width/7}" height="${height}" fill="#fff" stroke="#000"/>`;
+  });
+
+  // Highlight pressed white keys
+  notes.forEach(n=>{
+    const idx = whiteKeys.indexOf(n.replace(/[#b]/,''));
+    if (idx>=0 && !n.includes('#')) {
+      const x = idx*(width/7);
+      svg += `<rect x="${x}" y="0" width="${width/7}" height="${height}" fill="#88c" opacity="0.4"/>`;
+    }
+  });
+
+  // Draw black keys
+  blackKeys.forEach((note,i)=>{
+    if(!note) return;
+    const x = i*(width/7) + (width/14)*0.8;
+    svg += `<rect x="${x}" y="0" width="${width/14}" height="${height*0.6}" fill="#000"/>`;
+  });
+
+  // Highlight pressed black keys
+  notes.forEach(n=>{
+    if(n.includes('#')){
+      const idx = keyOrder.indexOf(n);
+      if(idx>=0){
+        const x = (idx*(width/12));
+        svg += `<rect x="${x}" y="0" width="${width/14}" height="${height*0.6}" fill="#88f" opacity="0.6"/>`;
+      }
+    }
+  });
+
+  svg += `<text x="${width/2}" y="${height - 3}" font-size="8" fill="#111" text-anchor="middle">${name}</text>`;
+  svg += `</svg>`;
+  return svg;
+}
+
+// Basic keyboard chord dictionary
+const KEYBOARD_CHORDS = {
+  'C': ['C','E','G'],
+  'Cm': ['C','D#','G'],
+  'D': ['D','F#','A'],
+  'Dm': ['D','F','A'],
+  'E': ['E','G#','B'],
+  'Em': ['E','G','B'],
+  'F': ['F','A','C'],
+  'F#': ['F#','A#','C#'],
+  'G': ['G','B','D'],
+  'Gm': ['G','A#','D'],
+  'A': ['A','C#','E'],
+  'Am': ['A','C','E'],
+  'B': ['B','D#','F#'],
+  'Bm': ['B','D','F#']
+};
+
 
 // Draw a simple SVG fretboard for a chord
 function drawGuitarChord(name, frets) {
@@ -759,23 +947,47 @@ function extractChordsFromOutput() {
 function renderChordLegend() {
   const legend = document.getElementById('chordLegend');
   const chords = extractChordsFromOutput();
+  const view = document.getElementById('chordViewSelect').value;
+
   if (!chords.length) {
     legend.innerHTML = '<em>No chords detected.</em>';
     return;
   }
 
-  let html = '<h3 style="margin-top:0;margin-bottom:10px;">Chord Legend (Guitar)</h3>';
-  html += '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;">';
-  for (const ch of chords) {
-    const base = GUITAR_CHORDS[ch] || null;
-    if (base) html += `<div>${drawGuitarChord(ch, base)}</div>`;
-    else html += `<div style="width:60px;height:80px;text-align:center;font-size:10px;color:#888;border:1px dashed #ccc;border-radius:8px;display:flex;align-items:center;justify-content:center;">${ch}</div>`;
+  const makeGuitar = ch => {
+    const base = GUITAR_CHORDS[ch];
+    return base
+      ? `<div>${drawGuitarChord(ch, base)}</div>`
+      : `<div style="width:60px;height:80px;text-align:center;font-size:10px;color:#888;border:1px dashed #ccc;border-radius:8px;display:flex;align-items:center;justify-content:center;">${ch}</div>`;
+  };
+
+  const makeKeyboard = ch => {
+    const base = KEYBOARD_CHORDS[ch];
+    return base
+      ? `<div>${drawKeyboardChord(ch, base)}</div>`
+      : `<div style="width:120px;height:50px;text-align:center;font-size:10px;color:#888;border:1px dashed #ccc;border-radius:8px;display:flex;align-items:center;justify-content:center;">${ch}</div>`;
+  };
+
+  let html = '';
+  if (view === 'guitar') {
+    html += `<h3>Chord Legend (Guitar)</h3><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;">${chords.map(makeGuitar).join('')}</div>`;
+  } else if (view === 'keyboard') {
+    html += `<h3>Chord Legend (Keyboard)</h3><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;">${chords.map(makeKeyboard).join('')}</div>`;
+  } else if (view === 'both') {
+    html += `<h3>Chord Legend (Guitar + Keyboard)</h3>`;
+    html += `<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:10px;">${chords.map(makeGuitar).join('')}</div>`;
+    html += `<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;border-top:1px solid #ddd;padding-top:10px;">${chords.map(makeKeyboard).join('')}</div>`;
   }
-  html += '</div>';
+
   legend.innerHTML = html;
 }
+
 /* Toggle chord legend visibility */
 document.getElementById('showChordsToggle').addEventListener('change', function() {
+document.getElementById('chordViewSelect').addEventListener('change', () => {
+  const toggle = document.getElementById('showChordsToggle');
+  if (toggle.checked) renderChordLegend();
+});
   const legend = document.getElementById('chordLegend');
   if (this.checked) {
     legend.style.display = 'block';
@@ -815,24 +1027,41 @@ document.getElementById('shareLink').addEventListener('click', ()=>{
       .catch(()=>prompt('Copy this link manually:', url));
   }
 });
-/* Export PDF / Print */
+/* Export PDF / Print — include chord diagrams if visible */
 document.getElementById('exportPdf').addEventListener('click',()=>{
-  const viewerEl=document.getElementById('outputArea');
-  const content=viewerEl.innerHTML;
-  const hasTwoCols=viewerEl.classList.contains('two-col');
-  const styles=Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
-  const printWindow=window.open("","_blank","width=900,height=1100");
-  const viewerClass=`viewer${hasTwoCols?' two-col':''}`;
+  const viewerEl = document.getElementById('outputArea');
+  const chordLegendEl = document.getElementById('chordLegend');
+  let content = viewerEl.innerHTML;
+
+  // ✅ Include chord diagrams if they’re visible
+  if (chordLegendEl && chordLegendEl.style.display !== 'none') {
+    content += `<div style="margin-top:20px;">${chordLegendEl.innerHTML}</div>`;
+  }
+
+  const hasTwoCols = viewerEl.classList.contains('two-col');
+  const styles = Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
+  const printWindow = window.open("", "_blank", "width=900,height=1100");
+  const viewerClass = `viewer${hasTwoCols?' two-col':''}`;
+
   printWindow.document.write(`
     <!doctype html><html><head><meta charset="utf-8">
     <title>Print Song</title>${styles}
-    <style>body{margin:0;background:white;}@page{size:Letter;margin:12mm;}
-    .viewer{padding:var(--viewer-pad);background:#fff;box-shadow:none}</style>
+    <style>
+      body{margin:0;background:white;}
+      @page{size:Letter;margin:12mm;}
+      .viewer{padding:var(--viewer-pad);background:#fff;box-shadow:none}
+      .chord-legend{page-break-before:always;}
+    </style>
     </head><body><div class="${viewerClass}">${content}</div>
-    <script>try{document.querySelector('.viewer').style.printColorAdjust='exact';}catch(e){}
-    window.addEventListener('load',()=>setTimeout(()=>{window.print();window.close();},150));<\/script>
-    </body></html>`);
-  printWindow.document.close(); printWindow.focus();
+    <script>
+      try{document.querySelector('.viewer').style.printColorAdjust='exact';}catch(e){}
+      window.addEventListener('load',()=>setTimeout(()=>{window.print();window.close();},150));
+    <\/script>
+    </body></html>
+  `);
+
+  printWindow.document.close();
+printWindow.focus();
 });
 /* Init */
 (function init(){

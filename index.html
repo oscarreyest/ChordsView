@@ -625,13 +625,21 @@ function render(){
   // Combine normal key transposition and capo offset:
   // Chords are transposed by (key transpose - capo semitones)
   const effectiveSteps = transposeSteps - capoShift;
+  // 🎶 Optional: display capo note under header if capo > 0
+  let capoNoteHtml = '';
+  if (capoShift > 0) {
+    capoNoteHtml = `<div class="meta-row" style="margin-top:4px;font-size:13px;color:#777;font-style:italic;">
+      Capo on fret ${capoShift}
+    </div>`;
+  }
 
   const {header,body,hasExplicit}=splitHeaderBlock(raw);
   const metaFallback=parseMetaFields(raw);
   const headerHtml=renderHeaderRaw(header,hasExplicit?null:metaFallback,sel);
+  const fullHeaderHtml = headerHtml + capoNoteHtml;
   const bodyT=applyTransposeToText(body,effectiveSteps);
   const bodyHtml=parseChordProBody(bodyT);
-  document.getElementById('outputArea').innerHTML = headerHtml + bodyHtml;
+    document.getElementById('outputArea').innerHTML = fullHeaderHtml + bodyHtml;
 
 // Run auto-fit and apply Safari column reflow fix
 requestAnimationFrame(()=>{

@@ -184,10 +184,10 @@ footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
     overflow: visible !important;
   }
 
-  /* Keep entire section boxes from splitting between columns/pages */
+    /* Allow Chrome to break sections if needed to avoid large gaps */
   .section-box {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
   }
 }
 </style>

@@ -1057,7 +1057,7 @@ document.getElementById('shareLink').addEventListener('click', ()=>{
   const text = document.getElementById('source').value || '';
   const compressed = LZString.compressToBase64(text);
   const encoded = encodeURIComponent(compressed); // URI safe
-  const url = `${location.origin}${location.pathname}?song=${encoded}`;
+  const url = `${location.origin}/go/?s=${encoded}`;
 
   const inIframe = (window.self !== window.top);
 

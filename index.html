@@ -1342,7 +1342,7 @@ function extractChordsFromOutput() {
     const raw = span.textContent.trim();
     // Handle multi-chord tokens like "C G" inside one span
     raw.split(/\s+/).forEach(ch => {
-      if (/^[A-G][#b]?(m|maj7|m7|7|sus2|sus4)?$/.test(ch)) {
+      if (/^[A-G][#b]?(m|maj7|m7|7|sus2|sus4|5)?(\/[A-G][#b]?)?$/.test(ch)) {
         chords.add(ch);
       }
     });

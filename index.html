@@ -331,47 +331,8 @@ And leads us [G] right along the way
       Song Chart Creator - Propiedad del Worship Team De la Iglesia Bautista Nueva Esperanza - Richmond, VA
     </footer>
   </div>
-<!-- ✅ Working LZString compressor -->
-<script>
-/*! LZString v1.4.4 – clean build */
-const LZString=(function(){
-  function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length;n++)t[o][o.charAt(n)]=n}return t[o][r]}
-  var r=String.fromCharCode,n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",t={};
-  const e={
-    compressToBase64:function(e){
-      if(e==null)return"";let t=this._compress(e,6,o=>n.charAt(o));
-      return["","===","==","="][t.length%4]+t
-    },
-    decompressFromBase64:function(e){
-      return e?this._decompress(e.length,32,t=>o(n,e.charAt(t))):""
-    },
-    _compress:function(o,r,n){
-      if(o==null)return"";let t,i,s={},p={},u="",a="",c=2,l=3,f=2,h=[],d=0,m=0;
-      for(t=0;t<o.length;t+=1)
-        if(u=o.charAt(t),!Object.prototype.hasOwnProperty.call(s,u)&&(s[u]=l++,p[u]=!0),a=u+a,Object.prototype.hasOwnProperty.call(s,a))u=a;
-        else{if(Object.prototype.hasOwnProperty.call(p,u)){
-          for(i=u.charCodeAt(0)<256?0:1;f>i;i++)d<<=1,m==r-1?(m=0,h.push(n(d)),d=0):m++;
-          for(i=u.charCodeAt(0);i>0;i>>=1)d=d<<1|1&i>>0,m==r-1?(m=0,h.push(n(d)),d=0):m++;
-          c--,0==c&&(c=Math.pow(2,f),f++),delete p[u]
-        }else for(i=s[u],f>0;i>>=1)d=d<<1|1&i>>0,m==r-1?(m=0,h.push(n(d)),d=0):m++;
-        c--,0==c&&(c=Math.pow(2,f),f++),s[a]=l++,a=String(u)}
-      return h.join("")
-    },
-    _decompress:function(n,e,t){
-      if(n==null)return"";let i,s,p,u,a,c=[],l=4,f=4,h=3,d="",m=[],v={val:t(0),position:e,index:1};
-      for(i=0;i<3;i+=1)c[i]=i;
-      let w,g,A={val:v.val,position:v.position,index:v.index};
-      for(s=0,p=Math.pow(2,2),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=e,A.val=t(A.index++)),s|=(a>0?1:0)*u,u<<=1;
-      switch(w=s){case 0:w=r(s);break;case 1:w=r(s);break;case 2:return""}
-      c[3]=w,g=w,m.push(w);
-      for(;;){if(A.index>n.length)return"";for(s=0,p=Math.pow(2,h),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=e,A.val=t(A.index++)),s|=(a>0?1:0)*u,u<<=1;
-        if(s==2)return m.join("");if(!c[s])return null;v=c[s],m.push(v),c[f++]=g+v.charAt(0),g=v}
-    }
-  };
-  return e;
-})();
-</script>
-
+<!-- ✅ Load LZString from official CDN -->
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script>
 /* ================== Utilities ================== */
 const MAJOR_KEYS=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];

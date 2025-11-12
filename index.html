@@ -1050,25 +1050,25 @@ document.getElementById('downloadCho').addEventListener('click',()=>{
   if(m) name=m[1].trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_');
   a.download=name+'.cho'; a.click(); URL.revokeObjectURL(a.href);
 });
-/* Share Link — works both standalone and inside iframes (Google Sites safe) */
+/* ✅ Fixed Share Link — robust copy + safe encoding for all hosts */
 document.getElementById('shareLink').addEventListener('click', ()=>{
   const text = document.getElementById('source').value || '';
-  const enc = LZString.compressToBase64(text);
-  const url = location.origin + location.pathname + '?song=' + enc;
+  const compressed = LZString.compressToBase64(text);
+  const encoded = encodeURIComponent(compressed); // URI safe
+  const url = `${location.origin}${location.pathname}?song=${encoded}`;
 
-  // Detect if viewer is running inside an iframe (e.g., Google Sites)
   const inIframe = (window.self !== window.top);
 
-  if (inIframe) {
-    // Restricted context — show prompt instead of clipboard
-    prompt('Copy this link manually:', url);
-  } else {
-    // Direct GitHub Pages or full-window mode — try clipboard first
+  // Try clipboard first
+  if (navigator.clipboard && !inIframe) {
     navigator.clipboard.writeText(url)
-      .then(()=>alert('Link copied to clipboard!'))
+      .then(()=>alert('✅ Share link copied to clipboard!'))
       .catch(()=>prompt('Copy this link manually:', url));
+  } else {
+    prompt('Copy this link manually:', url);
   }
 });
+
 /* Export PDF / Print — include chord diagrams if visible */
 document.getElementById('exportPdf').addEventListener('click',()=>{
   const viewerEl = document.getElementById('outputArea');
@@ -1124,28 +1124,25 @@ printWindow.focus();
     s.appendChild(o);
   }
 
-  const params=new URLSearchParams(location.search);
- if (params.has('song')) {
-  const rawParam = params.get('song');
-  let decompressed = '';
-
-  try {
-    decompressed = LZString.decompressFromBase64(rawParam);
-  } catch (e) {
-    decompressed = null;
-  }
-
-  // ✅ Fallback: handle old (non-compressed) links gracefully
-  if (!decompressed || decompressed.trim() === '') {
+   const params = new URLSearchParams(location.search);
+  if (params.has('song')) {
+    const rawParam = params.get('song');
+    let decoded = '';
     try {
-      decompressed = decodeURIComponent(escape(atob(rawParam)));
-    } catch (e2) {
-      decompressed = rawParam;
+      decoded = decodeURIComponent(rawParam);
+    } catch (e) {
+      decoded = rawParam;
     }
-  }
 
-  document.getElementById('source').value = decompressed || '';
-}
+    let decompressed = '';
+    try {
+      decompressed = LZString.decompressFromBase64(decoded) || '';
+    } catch (e2) {
+      decompressed = '';
+    }
+
+    document.getElementById('source').value = decompressed || decoded || '';
+  }
 
   // 🎸 Sync Capo dropdown with {capo: n} tag when loading
   const textArea = document.getElementById('source');

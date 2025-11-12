@@ -299,21 +299,14 @@ body.view-only #outputArea {
 {comment: Verse 1}
 [C] This is the [F] verse that tells a [C] story  
 And leads us [G] right along the way
-[C] Every [Am] word is here to [F] show  
-[G] The ChordPro [C] display
 
 {comment: Verse 2}
-[C] This is the [F] verse that tells a [C] story  
-And leads us [G] right along the way
 [C] Every [Am] word is here to [F] show  
 [G] The ChordPro [C] display
 
 {start_of_chorus}
 [F] Sing out loud, let your [C] heart rejoice  
 [G] Every chord and [Am] every voice  
-[F] Music flowing [C] strong and free  
-[G] Just like it's [C] meant to be
-{end_of_chorus}
 
 {start_of_instrumental}
 [C]    [F]    [G]    [C]
@@ -960,39 +953,61 @@ const KEYBOARD_CHORDS = {
 };
 
 
-// Draw a simple SVG fretboard for a chord
+// 🎸 Smart guitar chord diagram — shows fret number only if chord goes past 5th fret
 function drawGuitarChord(name, frets) {
   const fretCount = 5;
   const width = 60, height = 80;
-  const nutOffset = typeof frets[0] === 'number' && frets.some(f => f > 1) ? 1 : 0;
+
+  const numericFrets = frets.filter(f => typeof f === 'number');
+  const minFret = numericFrets.length ? Math.min(...numericFrets) : 0;
+  const maxFret = numericFrets.length ? Math.max(...numericFrets) : 0;
+
+  // ✅ Shift view only if chord extends beyond 5th fret
+  const shiftNeeded = maxFret > fretCount;
+  const shiftBase = shiftNeeded ? (minFret - 1) : 0;
+  const showFretNumber = shiftNeeded;
+
   let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
   svg += `<rect width="${width}" height="${height}" fill="#fff"/>`;
 
   // Strings (vertical)
-  for (let i=0;i<6;i++) {
-    const x = 10 + i*8;
+  for (let i = 0; i < 6; i++) {
+    const x = 10 + i * 8;
     svg += `<line x1="${x}" y1="20" x2="${x}" y2="70" stroke="#555" stroke-width="1"/>`;
   }
 
   // Frets (horizontal)
-  for (let f=0; f<=fretCount; f++) {
-    const y = 20 + f*10;
-    svg += `<line x1="10" y1="${y}" x2="50" y2="${y}" stroke="#555" stroke-width="${f===0&&!nutOffset?2:1}"/>`;
+  for (let f = 0; f <= fretCount; f++) {
+    const y = 20 + f * 10;
+    if (f === 0 && !showFretNumber) {
+      // Thick nut for open-position chords
+      svg += `<line x1="10" y1="${y}" x2="50" y2="${y}" stroke="#000" stroke-width="3"/>`;
+    } else {
+      svg += `<line x1="10" y1="${y}" x2="50" y2="${y}" stroke="#555" stroke-width="1"/>`;
+    }
   }
 
-  // Dots for fingers
-  frets.forEach((fret, i)=>{
-    if(fret==='x') {
-      svg += `<text x="${10+i*8}" y="15" font-size="6" text-anchor="middle">x</text>`;
-    } else if(fret===0) {
-      svg += `<circle cx="${10+i*8}" cy="15" r="2" fill="#fff" stroke="#333"/>`;
+  // Fret number indicator (for high-position chords)
+  if (showFretNumber) {
+    const textY = 30;
+    svg += `<text x="2" y="${textY}" font-size="8" fill="#555" font-family="monospace">${minFret}</text>`;
+  }
+
+  // Dots / open / muted strings
+  frets.forEach((fret, i) => {
+    const x = 10 + i * 8;
+    if (fret === 'x') {
+      svg += `<text x="${x}" y="15" font-size="6" text-anchor="middle">x</text>`;
+    } else if (fret === 0) {
+      svg += `<circle cx="${x}" cy="15" r="2" fill="#fff" stroke="#333"/>`;
     } else {
-      const y = 20 + fret*10;
-      svg += `<circle cx="${10+i*8}" cy="${y-5}" r="3" fill="#333"/>`;
+      const relativeFret = fret - shiftBase;
+      const y = 20 + relativeFret * 10 - 5;
+      svg += `<circle cx="${x}" cy="${y}" r="3" fill="#333"/>`;
     }
   });
 
-  svg += `<text x="${width/2}" y="78" font-size="8" text-anchor="middle">${name}</text>`;
+  svg += `<text x="${width / 2}" y="78" font-size="8" text-anchor="middle">${name}</text>`;
   svg += `</svg>`;
   return svg;
 }

@@ -1126,25 +1126,31 @@ printWindow.focus();
     s.appendChild(o);
   }
 
-   const params = new URLSearchParams(location.search);
-  if (params.has('song')) {
-    const rawParam = params.get('song');
-    let decoded = '';
-    try {
-      decoded = decodeURIComponent(rawParam);
-    } catch (e) {
-      decoded = rawParam;
-    }
+  const params = new URLSearchParams(location.search);
+const songParam = params.get('song') || params.get('s');
+if (songParam) {
+  let base64 = songParam;
 
-    let decompressed = '';
-    try {
-      decompressed = LZString.decompressFromBase64(decoded) || '';
-    } catch (e2) {
-      decompressed = '';
-    }
+  // Normalize URL-safe characters
+  base64 = base64.replace(/ /g, '+');
 
-    document.getElementById('source').value = decompressed || decoded || '';
+  let decoded = '';
+  try {
+    decoded = decodeURIComponent(base64);
+  } catch {
+    decoded = base64;
   }
+
+  let decompressed = '';
+  try {
+    decompressed = LZString.decompressFromBase64(decoded) || '';
+  } catch {
+    decompressed = '';
+  }
+
+  document.getElementById('source').value = decompressed || decoded || '';
+}
+
 
   // 🎸 Sync Capo dropdown with {capo: n} tag when loading
   const textArea = document.getElementById('source');

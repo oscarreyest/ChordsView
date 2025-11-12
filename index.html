@@ -1055,6 +1055,7 @@ document.getElementById('downloadCho').addEventListener('click',()=>{
   a.download=name+'.cho'; a.click(); URL.revokeObjectURL(a.href);
 });
 /* ✅ Fixed Share Link — robust copy + safe encoding for all hosts */
+console.log("✅ Share Link button found and script attached");
 document.getElementById('shareLink').addEventListener('click', ()=>{
   const text = document.getElementById('source').value || '';
   const compressed = LZString.compressToBase64(text);

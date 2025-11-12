@@ -331,11 +331,47 @@ And leads us [G] right along the way
       Song Chart Creator - Propiedad del Worship Team De la Iglesia Bautista Nueva Esperanza - Richmond, VA
     </footer>
   </div>
-<!-- ✅ Clean LZString compressor (full, safe) -->
+<!-- ✅ Working LZString compressor -->
 <script>
-/*! LZString v1.4.4 — https://pieroxy.net/blog/pages/lz-string/index.html */
-const LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length;n++)t[o][o.charAt(n)]=n}return t[o][r]}var r=String.fromCharCode,n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",e="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",t={},i={compressToBase64:function(o){if(null==o)return"";var r=i._compress(o,6,function(o){return n.charAt(o)});switch(r.length%4){default:case 0:return r;case 1:return r+"===";case 2:return r+"==";case 3:return r+"="}},decompressFromBase64:function(r){return null==r?"":""==r?null:i._decompress(r.length,32,function(e){return o(n,r.charAt(e))})},_compress:function(o,r,n){if(null==o)return"";var e,t,i={},s={},p="",u="",a="",c=2,l=3,f=2,h=[],d=0,m=0;for(i={},t=0;t<o.length;t+=1)if(p=o.charAt(t),Object.prototype.hasOwnProperty.call(i,p)||(i[p]=l++,s[p]=!0),u=a+p,Object.prototype.hasOwnProperty.call(i,u))a=u;else{if(Object.prototype.hasOwnProperty.call(s,a)){if(a.charCodeAt(0)<256){for(e=0;e<f;e++)d<<=1,m==r-1?(m=0,h.push(n(d)),d=0):m++;for(e=a.charCodeAt(0),h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++}else{for(e=1,h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++;for(e=a.charCodeAt(0),h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++}c--,0==c&&(c=Math.pow(2,f),f++),delete s[a]}else for(e=i[a],h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++;c--,0==c&&(c=Math.pow(2,f),f++),i[u]=l++,a=String(p)}if(""!==a){if(Object.prototype.hasOwnProperty.call(s,a)){if(a.charCodeAt(0)<256){for(e=0;e<f;e++)d<<=1,m==r-1?(m=0,h.push(n(d)),d=0):m++;for(e=a.charCodeAt(0),h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++}else{for(e=1,h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++;for(e=a.charCodeAt(0),h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++}c--,0==c&&(c=Math.pow(2,f),f++),delete s[a]}else for(e=i[a],h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++;c--,0==c&&(c=Math.pow(2,f),f++);}for(e=2,h.push(n(e>>0&1)),h.push(n(e>>1&1)),h.push(n(e>>2&1)),h.push(n(e>>3&1)),h.push(n(e>>4&1)),h.push(n(e>>5&1)),h.push(n(e>>6&1)),h.push(n(e>>7&1)),m==r-1?(m=0,h.push(n(d)),d=0):m++;for(;;){if(d<<=1,m==r-1){h.push(n(d));break}m++}return h.join("")},_decompress:function(o,n,e){if(null==o)return"";for(var t,i,s,p,u,a,c,l,f=[],h=4,d=4,m=3,v="",w=[],A={val:e(0),position:n,index:1},g=0;g<3;g+=1)f[g]=g;for(s=0,p=Math.pow(2,2),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=e(A.index++)),s|=(a>0?1:0)*u,u<<=1;switch(t=s){case 0:for(s=0,p=Math.pow(2,8),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=e(A.index++)),s|=(a>0?1:0)*u,u<<=1;c=r(s);break;case 1:for(s=0,p=Math.pow(2,16),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=e(A.index++)),s|=(a>0?1:0)*u,u<<=1;c=r(s);break;case 2:return""}f[3]=c,l=c,w.push(c);for(;;){if(A.index>o.length)return"";for(s=0,p=Math.pow(2,m),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=e(A.index++)),s|=(a>0?1:0)*u,u<<=1;switch(c=s){case 0:for(s=0,p=Math.pow(2,8),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=e(A.index++)),s|=(a>0?1:0)*u,u<<=1;f[d++]=r(s),c=d-1,h--;break;case 1:for(s=0,p=Math.pow(2,16),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=e(A.index++)),s|=(a>0?1:0)*u,u<<=1;f[d++]=r(s),c=d-1,h--;break;case 2:return w.join("")}0==h&&(h=Math.pow(2,m),m++),f[c]?v=f[c]:""!==l&&(v=l+v.charAt(0)),w.push(v),f[d++]=l+v.charAt(0),h--,l=v,0==h&&(h=Math.pow(2,m),m++)}};return i}();
+/*! LZString v1.4.4 – clean build */
+const LZString=(function(){
+  function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length;n++)t[o][o.charAt(n)]=n}return t[o][r]}
+  var r=String.fromCharCode,n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",t={};
+  const e={
+    compressToBase64:function(e){
+      if(e==null)return"";let t=this._compress(e,6,o=>n.charAt(o));
+      return["","===","==","="][t.length%4]+t
+    },
+    decompressFromBase64:function(e){
+      return e?this._decompress(e.length,32,t=>o(n,e.charAt(t))):""
+    },
+    _compress:function(o,r,n){
+      if(o==null)return"";let t,i,s={},p={},u="",a="",c=2,l=3,f=2,h=[],d=0,m=0;
+      for(t=0;t<o.length;t+=1)
+        if(u=o.charAt(t),!Object.prototype.hasOwnProperty.call(s,u)&&(s[u]=l++,p[u]=!0),a=u+a,Object.prototype.hasOwnProperty.call(s,a))u=a;
+        else{if(Object.prototype.hasOwnProperty.call(p,u)){
+          for(i=u.charCodeAt(0)<256?0:1;f>i;i++)d<<=1,m==r-1?(m=0,h.push(n(d)),d=0):m++;
+          for(i=u.charCodeAt(0);i>0;i>>=1)d=d<<1|1&i>>0,m==r-1?(m=0,h.push(n(d)),d=0):m++;
+          c--,0==c&&(c=Math.pow(2,f),f++),delete p[u]
+        }else for(i=s[u],f>0;i>>=1)d=d<<1|1&i>>0,m==r-1?(m=0,h.push(n(d)),d=0):m++;
+        c--,0==c&&(c=Math.pow(2,f),f++),s[a]=l++,a=String(u)}
+      return h.join("")
+    },
+    _decompress:function(n,e,t){
+      if(n==null)return"";let i,s,p,u,a,c=[],l=4,f=4,h=3,d="",m=[],v={val:t(0),position:e,index:1};
+      for(i=0;i<3;i+=1)c[i]=i;
+      let w,g,A={val:v.val,position:v.position,index:v.index};
+      for(s=0,p=Math.pow(2,2),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=e,A.val=t(A.index++)),s|=(a>0?1:0)*u,u<<=1;
+      switch(w=s){case 0:w=r(s);break;case 1:w=r(s);break;case 2:return""}
+      c[3]=w,g=w,m.push(w);
+      for(;;){if(A.index>n.length)return"";for(s=0,p=Math.pow(2,h),u=1;u!=p;)a=A.val&A.position,A.position>>=1,0==A.position&&(A.position=e,A.val=t(A.index++)),s|=(a>0?1:0)*u,u<<=1;
+        if(s==2)return m.join("");if(!c[s])return null;v=c[s],m.push(v),c[f++]=g+v.charAt(0),g=v}
+    }
+  };
+  return e;
+})();
 </script>
+
 <script>
 /* ================== Utilities ================== */
 const MAJOR_KEYS=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];

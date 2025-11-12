@@ -1125,14 +1125,28 @@ printWindow.focus();
   }
 
   const params=new URLSearchParams(location.search);
-  if(params.has('song')){
+ if (params.has('song')) {
+  const rawParam = params.get('song');
+  let decompressed = '';
+
+  try {
+    decompressed = LZString.decompressFromBase64(rawParam);
+  } catch (e) {
+    decompressed = null;
+  }
+
+  // ✅ Fallback: handle old (non-compressed) links gracefully
+  if (!decompressed || decompressed.trim() === '') {
     try {
-      document.getElementById('source').value =
-  LZString.decompressFromBase64(params.get('song')) || '';
-    } catch(e) {
-      document.getElementById('source').value = params.get('song');
+      decompressed = decodeURIComponent(escape(atob(rawParam)));
+    } catch (e2) {
+      decompressed = rawParam;
     }
   }
+
+  document.getElementById('source').value = decompressed || '';
+}
+
   // 🎸 Sync Capo dropdown with {capo: n} tag when loading
   const textArea = document.getElementById('source');
   const capoMatch = textArea.value.match(/\{capo:\s*(\d+)\s*\}/i);

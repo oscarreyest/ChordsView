@@ -599,17 +599,12 @@ function renderHeaderRaw(headerText, metaFallback=null, selValue=''){
         else if(tag==='subtitle') pushLine(`<div class="subtitle">${esc(val)}</div>`);
         else if(tag==='artist') pushLine(`<div class="meta-row">Artist: ${esc(val)}</div>`);
         else if(tag==='album') pushLine(`<div class="meta-row">Album: ${esc(val)}</div>`);
-        else if(['key','time','tempo','capo'].includes(tag)){
+   else if(['key','time','tempo','capo'].includes(tag)){
   if(!metaLine) metaLine=[];
-  let displayVal = val;
-  // ✅ If this is the key line, update it to show the selected key (if transposed)
-if (['key','time','tempo','capo'].includes(tag)){
-  if(!metaLine) metaLine=[];
-  let displayVal = val; // ← always use original value now
+  let displayVal = val;  // always show original header value
   metaLine.push(`${tag[0].toUpperCase()+tag.slice(1)}: ${esc(displayVal)}`);
 }
-  metaLine.push(`${tag[0].toUpperCase()+tag.slice(1)}: ${esc(displayVal)}`);
-}
+
 else if(tag==='comment') pushLine(`<div class="meta-row">${esc(val)}</div>`);
         else if(tag==='comment_box'){
           const updated=replaceSingleBracketWithDisplayKey(val, selValue);

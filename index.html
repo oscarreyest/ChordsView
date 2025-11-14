@@ -12,6 +12,8 @@
     /* Screen tints for sections */
     --generic-bg:#f8f9fa;
     --verse-bg:#f3fdf3;
+    --prechorus-bg:#fff4e0;  /* soft orange tint */
+    --prechorus-ac:#ffb74d;  /* matches your solo-ac / similar warm tone */
     --chorus-bg:#eef6ff;
     --bridge-bg:#fffbea;
     --intro-bg:#f9f5ff;
@@ -114,6 +116,67 @@
   .section-box.medley{background:var(--medley-bg)}
   .section-box.instrumental{background:var(--instrumental-bg)}
   .section-box.solo{background:var(--solo-bg)}
+.section-box.prechorus {background:var(--prechorus-bg);}
+
+/* VERSE */
+.section-box.verse .section-line,
+.section-box.verse .section-badge {
+  border-color: var(--verse-ac);
+}
+
+/* CHORUS */
+.section-box.chorus .section-line,
+.section-box.chorus .section-badge {
+  border-color: var(--chorus-ac);
+}
+
+/* BRIDGE */
+.section-box.bridge .section-line,
+.section-box.bridge .section-badge {
+  border-color: var(--bridge-ac);
+}
+
+/* INTRO */
+.section-box.intro .section-line,
+.section-box.intro .section-badge {
+  border-color: var(--intro-ac);
+}
+
+/* INTERLUDE */
+.section-box.interlude .section-line,
+.section-box.interlude .section-badge {
+  border-color: var(--interlude-ac);
+}
+
+/* OUTRO */
+.section-box.outro .section-line,
+.section-box.outro .section-badge {
+  border-color: var(--outro-ac);
+}
+
+/* MEDLEY */
+.section-box.medley .section-line,
+.section-box.medley .section-badge {
+  border-color: var(--medley-ac);
+}
+
+/* INSTRUMENTAL */
+.section-box.instrumental .section-line,
+.section-box.instrumental .section-badge {
+  border-color: var(--instrumental-ac);
+}
+
+/* SOLO */
+.section-box.solo .section-line,
+.section-box.solo .section-badge {
+  border-color: var(--solo-ac);
+}
+
+/* PRECHORUS (new – add this) */
+.section-box.prechorus .section-line,
+.section-box.prechorus .section-badge {
+  border-color: var(--prechorus-ac);
+}
 
   .section-head{position:relative;padding:18px 16px 4px 16px}
   .section-title{margin:8px 0 0 0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;

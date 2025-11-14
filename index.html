@@ -603,9 +603,11 @@ function renderHeaderRaw(headerText, metaFallback=null, selValue=''){
   if(!metaLine) metaLine=[];
   let displayVal = val;
   // ✅ If this is the key line, update it to show the selected key (if transposed)
-  if (tag === 'key' && selValue && selValue.trim() !== '') {
-    displayVal = selValue;
-  }
+if (['key','time','tempo','capo'].includes(tag)){
+  if(!metaLine) metaLine=[];
+  let displayVal = val; // ← always use original value now
+  metaLine.push(`${tag[0].toUpperCase()+tag.slice(1)}: ${esc(displayVal)}`);
+}
   metaLine.push(`${tag[0].toUpperCase()+tag.slice(1)}: ${esc(displayVal)}`);
 }
 else if(tag==='comment') pushLine(`<div class="meta-row">${esc(val)}</div>`);

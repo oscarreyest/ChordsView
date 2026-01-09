@@ -1539,6 +1539,24 @@ document.getElementById('shareLink').addEventListener('click', ()=>{
   }
 });
 
+  /* 👁 Share Viewer Link — view-only version */
+document.getElementById('shareViewerBtn')?.addEventListener('click', ()=>{
+  const text = document.getElementById('source').value || '';
+  const compressed = LZString.compressToBase64(text);
+  const encoded = encodeURIComponent(compressed); // URI safe
+  const viewerUrl = `${location.origin}/go/?s=${encoded}&v=1`;
+
+  const inIframe = (window.self !== window.top);
+
+  if (navigator.clipboard && !inIframe) {
+    navigator.clipboard.writeText(viewerUrl)
+      .then(()=>alert('👁 Viewer link copied!'))
+      .catch(()=>prompt('Copy this viewer link manually:', viewerUrl));
+  } else {
+    prompt('Copy this viewer link manually:', viewerUrl);
+  }
+});
+
 /* Export PDF / Print — include chord diagrams if visible */
 document.getElementById('exportPdf').addEventListener('click',()=>{
   const viewerEl = document.getElementById('outputArea');

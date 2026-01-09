@@ -1529,6 +1529,8 @@ document.getElementById('shareLink').addEventListener('click', ()=>{
 
   const inIframe = (window.self !== window.top);
 
+  console.log('👁 View mode:', isViewMode);
+
   // Try clipboard first
   if (navigator.clipboard && !inIframe) {
     navigator.clipboard.writeText(url)
@@ -1614,6 +1616,7 @@ printWindow.focus();
 
   const params = new URLSearchParams(location.search);
 const songParam = params.get('song') || params.get('s');
+  const isViewMode = params.get('v') === '1';
 if (songParam) {
   let base64 = songParam;
 

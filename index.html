@@ -258,10 +258,22 @@ body.view-only {
   background:#fff;
 }
 
+/* View-only mode — hide editor UI only */
 body.view-only header,
-body.view-only .card,
 body.view-only footer {
-  display:none !important;   /* hide editor, header, footer */
+  display: none !important;
+}
+
+body.view-only .editor-only {
+  display: none !important;
+}
+
+/* Ensure output stays visible */
+body.view-only #outputArea {
+  display: block !important;
+  box-shadow: none;
+  padding: 24px;
+  border-radius: 0;
 }
 
 body.view-only #outputArea {

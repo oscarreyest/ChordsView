@@ -1705,6 +1705,26 @@ if (songParam) {
     el.style.display = 'none';
   });
 }
+/* 👁 Viewer defaults: show chords + both views */
+if (isViewMode) {
+  const showChordsToggle = document.getElementById('showChordsToggle');
+  const chordViewSelect = document.getElementById('chordViewSelect');
+
+  if (showChordsToggle && chordViewSelect) {
+    // Enable chord legend
+    showChordsToggle.checked = true;
+
+    // Default to Guitar + Keyboard
+    chordViewSelect.value = 'both';
+
+    // Render chord legend after first render
+    setTimeout(() => {
+      renderChordLegend();
+      document.getElementById('chordLegend').style.display = 'block';
+    }, 0);
+  }
+}
+  
   render();
 // 🧩 Mobile header fix: ensure header starts at top after first render
   setTimeout(() => {

@@ -339,7 +339,7 @@ body.view-only #outputArea {
       <p>Usa el siguiente ejemplo como referencia para crear nuevos charts.</p>
     </header>
 
-    <div class="card">
+    <div class="card editor-only">
       <label for="source" style="display:block;font-weight:600;margin-bottom:8px">
         ChordPro source
       </label>
@@ -386,7 +386,7 @@ And leads us [G] right along the way
 
       <div class="controls no-print">
         <button id="render" class="btn primary">Render</button>
-        <button id="downloadCho" class="btn">Download .cho</button>
+        <button id="downloadCho" class="btn editor-only">Download .cho</button>
         <button id="shareLink" class="btn">Share Link</button>
         <button id="shareViewerBtn">Share Viewer Link</button>
         <button id="exportPdf" class="btn">Export PDF / Print</button>
@@ -1652,6 +1652,12 @@ if (songParam) {
   } else {
     capoSelect.value = '0';  // default
   }
+  if (isViewMode) {
+  document.body.classList.add('view-only');
+  document.querySelectorAll('.editor-only').forEach(el => {
+    el.style.display = 'none';
+  });
+}
   render();
 // 🧩 Mobile header fix: ensure header starts at top after first render
   setTimeout(() => {

@@ -289,6 +289,15 @@ body.view-only #outputArea.viewer {
   margin-left: auto;
   margin-right: auto;
 }
+/* 👁 Viewer mode — re-enable interactive controls */
+body.view-only .controls {
+  display: flex !important;
+  margin-bottom: 12px;
+}
+
+body.view-only .controls .editor-only {
+  display: none !important;
+}
   
 body.view-only #outputArea {
   box-shadow:none;
@@ -372,7 +381,7 @@ body.view-only #outputArea {
 
       <textarea id="source">{start_header}
 {title: Sample Song}
-{subtitle: Version IB Nueva Esperanza RVA}
+{subtitle: Versión IB Nueva Esperanza RVA}
 {artist: Demo Band}
 {key: C}
 {time: 4/4}
@@ -398,6 +407,10 @@ And leads us [G] right along the way
 [G] Every chord and [Am] every voice
 {end_of_chorus}
 
+{start_of_bridge}
+[C]    [F]    [G]    [C]
+{end_of_bridge}
+        
 {start_of_instrumental}
 [C]    [F]    [G]    [C]
 {end_of_instrumental}
@@ -409,8 +422,9 @@ And leads us [G] right along the way
 {comment: Outro}
 [C]     [F]     [C]     [G]     [C]
 </textarea>
+    </div>
 
-      <div class="controls no-print">
+          <div class="controls no-print">
         <button id="render" class="btn primary">Render</button>
         <button id="downloadCho" class="btn editor-only">Download .cho</button>
         <button id="shareLink" class="btn">Share Link</button>
@@ -452,8 +466,7 @@ And leads us [G] right along the way
           </select>
         </div>
       </div>
-    </div>
-
+    
     <div id="outputArea" class="viewer card" aria-live="polite"></div>
 <div id="chordLegend" class="card" style="display:none; margin-top:12px; padding:12px;">
   <!-- Chord diagrams will appear here -->

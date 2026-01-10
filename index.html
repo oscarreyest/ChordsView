@@ -268,6 +268,14 @@ body.view-only .editor-only {
   display: none !important;
 }
 
+  /* 👁 Viewer mode — hide edit/share actions */
+body.view-only #render,
+body.view-only #downloadCho,
+body.view-only #shareLink,
+body.view-only #shareViewerBtn {
+  display: none !important;
+}
+
 /* Ensure output stays visible */
 body.view-only #outputArea {
   display: block !important;

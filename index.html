@@ -1612,14 +1612,14 @@ function renderChordLegend() {
 
   legend.innerHTML = html;
 }
-
-/* Toggle chord legend visibility */
-document.getElementById('showChordsToggle').addEventListener('change', function() {
 document.getElementById('chordViewSelect').addEventListener('change', () => {
   const toggle = document.getElementById('showChordsToggle');
-  if (toggle.checked) renderChordLegend();
+  if (toggle && toggle.checked) renderChordLegend();
 });
+/* Toggle chord legend visibility */
+document.getElementById('showChordsToggle').addEventListener('change', function() {
   const legend = document.getElementById('chordLegend');
+  if (!legend) return;
   if (this.checked) {
     legend.style.display = 'block';
     renderChordLegend();
@@ -1629,6 +1629,7 @@ document.getElementById('chordViewSelect').addEventListener('change', () => {
   }
 });
 document.getElementById('keySelect').addEventListener('change',render);
+document.getElementById('nashvilleToggle')?.addEventListener('change', render);
 /* 🧩 Capo dropdown — updates the {capo: n} tag automatically */
 document.getElementById('capoSelect').addEventListener('change', function(){
   const textArea = document.getElementById('source');
@@ -1649,7 +1650,6 @@ document.getElementById('capoSelect').addEventListener('change', function(){
       text = `{capo: ${capoValue}}\n` + text;
     }
   }
-document.getElementById('nashvilleToggle')?.addEventListener('change', render);
   textArea.value = text;
   render();  // Immediately re-render with new capo
 });

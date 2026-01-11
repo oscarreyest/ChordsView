@@ -472,6 +472,10 @@ And leads us [G] right along the way
           <select id="keySelect" aria-label="Transpose to key" title="Transpose to key">
             <option value="">(original)</option>
           </select>
+          <label style="font-weight:600;margin-left:10px;">
+  <input type="checkbox" id="nashvilleToggle" style="margin-right:4px;">
+  Nashville
+</label>
         </div>
       </div>
     
@@ -493,6 +497,83 @@ const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const FLAT_EQ={Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
 let transposeSteps=0,songOriginalKey=null;
 
+/* ================== Nashville Numbers ================== */
+function parseChordRoot(ch) {
+  // Returns { root:"C#", rest:"m7sus4", bass:"E" } etc.
+  const [main, bass] = ch.split('/');
+  const m = (main || '').match(/^([A-G])([#b])?(.*)$/);
+  if (!m) return null;
+  let root = (m[1] || '').toUpperCase() + (m[2] || '');
+  let rest = (m[3] || '');
+  // normalize flats to sharps to match your NOTES array
+  if (FLAT_EQ[root]) root = FLAT_EQ[root];
+  let bassRoot = null;
+  if (bass) {
+    const bm = bass.match(/^([A-G])([#b])?(.*)$/);
+    if (bm) {
+      bassRoot = (bm[1] || '').toUpperCase() + (bm[2] || '');
+      if (FLAT_EQ[bassRoot]) bassRoot = FLAT_EQ[bassRoot];
+    }
+  }
+  return { root, rest, bass: bassRoot };
+}
+
+function degreeLabelFromSemis(semi, isMinorKey) {
+  // semi: 0..11
+  // Major degrees: 1, b2, 2, b3, 3, 4, #4, 5, b6, 6, b7, 7
+  // Minor degrees (natural minor): 1, b2, 2, b3, 3, 4, b5/#4, 5, b6, 6, b7, 7
+  const majorMap = {
+    0:"1", 1:"♭2", 2:"2", 3:"♭3", 4:"3", 5:"4", 6:"♯4", 7:"5", 8:"♭6", 9:"6", 10:"♭7", 11:"7"
+  };
+  // For minor we keep the same chromatic labeling; users understand ♭3/♭6/♭7 etc.
+  const minorMap = majorMap;
+  return (isMinorKey ? minorMap : majorMap)[semi] || "";
+}
+
+function nashvilleForChord(chordToken, keyName) {
+  // keyName can be "C" or "Am"
+  const nk = normalizeKey(keyName);
+  if (!nk) return chordToken;
+
+  const isMinorKey = /m$/i.test(nk);
+  const keyRoot = nk.replace(/m$/,'');
+  const parsed = parseChordRoot(chordToken);
+  if (!parsed) return chordToken;
+
+  const keyIdx = NOTES.indexOf(keyRoot);
+  const rootIdx = NOTES.indexOf(parsed.root);
+  if (keyIdx < 0 || rootIdx < 0) return chordToken;
+
+  let semi = (rootIdx - keyIdx) % 12;
+  if (semi < 0) semi += 12;
+
+  const deg = degreeLabelFromSemis(semi, isMinorKey);
+  if (!deg) return chordToken;
+
+  // Preserve chord quality/extension text (m, 7, maj7, sus, add9, etc.)
+  // Example: "Am7" in key of C -> "6m7"
+  const outMain = `${deg}${parsed.rest || ""}`;
+
+  if (parsed.bass) {
+    const bassIdx = NOTES.indexOf(parsed.bass);
+    if (bassIdx < 0) return outMain + "/?";
+    let bsemi = (bassIdx - keyIdx) % 12; if (bsemi < 0) bsemi += 12;
+    const bdeg = degreeLabelFromSemis(bsemi, isMinorKey) || "?";
+    return `${outMain}/${bdeg}`;
+  }
+
+  return outMain;
+}
+
+function applyNashvilleToText(text, keyName) {
+  // Converts bracket chords only: [C] [Dm7] [G/B] etc.
+  return text.replace(/\[([^\]]+)\]/g, (_, inside) => {
+    const toks = inside.split(/\s+/).filter(Boolean);
+    const conv = toks.map(t => nashvilleForChord(t, keyName));
+    return '[' + conv.join(' ') + ']';
+  });
+}
+  
 const esc=s=>(s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 /* Transpose */
@@ -947,7 +1028,24 @@ function render(){
   const headerHtml=renderHeaderRaw(header,hasExplicit?null:metaFallback,sel);
   const fullHeaderHtml = headerHtml + capoNoteHtml;
   const bodyT=applyTransposeToText(body,effectiveSteps);
-  const bodyHtml=parseChordProBody(bodyT);
+    // 🎼 Nashville toggle (applies AFTER transpose/capo so it matches what musicians see)
+  const showNash = document.getElementById('nashvilleToggle')?.checked;
+  // What “key” should Nashville be relative to?
+  // If user selected a key, use that; else use the song original key.
+  const nashKey = (sel && sel.trim() !== '') ? sel.trim() : (songOriginalKey || '');
+
+  let bodyFinal = bodyT;
+  if (showNash && nashKey) {
+    bodyFinal = applyNashvilleToText(bodyT, nashKey);
+
+    // Optional sanity: Nashville + chord diagrams don't mix well → auto-hide diagrams
+    const tgl = document.getElementById('showChordsToggle');
+    const legend = document.getElementById('chordLegend');
+    if (tgl) tgl.checked = false;
+    if (legend) { legend.style.display = 'none'; legend.innerHTML = ''; }
+  }
+
+  const bodyHtml=parseChordProBody(bodyFinal);
     document.getElementById('outputArea').innerHTML = fullHeaderHtml + bodyHtml;
 
 // Run auto-fit and apply Safari column reflow fix
@@ -1551,7 +1649,7 @@ document.getElementById('capoSelect').addEventListener('change', function(){
       text = `{capo: ${capoValue}}\n` + text;
     }
   }
-
+document.getElementById('nashvilleToggle')?.addEventListener('change', render);
   textArea.value = text;
   render();  // Immediately re-render with new capo
 });

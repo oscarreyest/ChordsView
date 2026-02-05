@@ -1070,9 +1070,17 @@ function render(){
     if (!isNaN(capoVal) && capoVal >= 0 && capoVal <= 12) capoShift = capoVal;
   }
 
-  // Combine normal key transposition and capo offset:
-  // Chords are transposed by (key transpose - capo semitones)
-  const effectiveSteps = transposeSteps - capoShift;
+  // 🎺 Trumpet (Bb) transposition
+const windSelect = document.getElementById('windSelect'); // must exist in Viewer UI
+const isTrumpetBb = windSelect && windSelect.value === 'trumpet';
+
+// Bb trumpet reads a whole step higher (+2)
+const trumpetShift = isTrumpetBb ? 2 : 0;
+
+// ✅ FINAL transposition pipeline
+// concert transpose - capo + trumpet
+const effectiveSteps = transposeSteps - capoShift + trumpetShift;
+
   // 🎶 Optional: display capo note under header if capo > 0
   let capoNoteHtml = '';
   if (capoShift > 0) {

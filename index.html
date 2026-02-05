@@ -476,6 +476,15 @@ And leads us [G] right along the way
   <input type="checkbox" id="nashvilleToggle" style="margin-right:4px;">
   Nashville Number System
 </label>
+        <label style="font-weight:600;margin-left:12px;">
+  Wind:
+  <select id="windSelect"
+          style="margin-left:4px;padding:4px;border-radius:6px;border:1px solid #ccc;">
+    <option value="">None</option>
+    <option value="trumpet">Trumpet (Bb)</option>
+  </select>
+</label>
+
         </div>
       </div>
     
@@ -1080,11 +1089,21 @@ function render(){
 const trumpetConcertKey =
   (sel && sel.trim() !== '') ? sel.trim() : songOriginalKey;
 
-// Build trumpet annotation
-const trumpetNoteHtml = buildTrumpetAnnotation(trumpetConcertKey);
+// 🎺 Wind instrument annotation (conditional)
+let windNoteHtml = '';
+const windSelect = document.getElementById('windSelect');
+const selectedWind = windSelect ? windSelect.value : '';
+
+if (selectedWind === 'trumpet') {
+  const trumpetConcertKey =
+    (sel && sel.trim() !== '') ? sel.trim() : songOriginalKey;
+
+  windNoteHtml = buildTrumpetAnnotation(trumpetConcertKey);
+}
 
 // Combine header + annotations
-const fullHeaderHtml = headerHtml + capoNoteHtml + trumpetNoteHtml;
+const fullHeaderHtml = headerHtml + capoNoteHtml + windNoteHtml;
+
 
   const bodyT=applyTransposeToText(body,effectiveSteps);
     // 🎼 Nashville toggle (applies AFTER transpose/capo so it matches what musicians see)
@@ -1689,6 +1708,8 @@ document.getElementById('showChordsToggle').addEventListener('change', function(
 });
 document.getElementById('keySelect').addEventListener('change',render);
 document.getElementById('nashvilleToggle')?.addEventListener('change', render);
+document.getElementById('windSelect')?.addEventListener('change', render);
+
 /* 🧩 Capo dropdown — updates the {capo: n} tag automatically */
 document.getElementById('capoSelect').addEventListener('change', function(){
   const textArea = document.getElementById('source');

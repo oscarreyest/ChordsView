@@ -495,6 +495,55 @@ And leads us [G] right along the way
 const MAJOR_KEYS=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const FLAT_EQ={Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
+  /* ================== Trumpet Helpers ================== */
+
+// Prefer flats for display (Bb instruments)
+function preferFlats(note) {
+  const sharpToFlat = {
+    'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb'
+  };
+  return sharpToFlat[note] || note;
+}
+
+// Build trumpet scale annotation HTML
+function buildTrumpetAnnotation(concertKey) {
+  if (!concertKey) return '';
+
+  const nk = normalizeKey(concertKey);
+  if (!nk) return '';
+
+  const isMinor = /m$/.test(nk);
+  const concertRoot = nk.replace(/m$/, '');
+
+  const concertIndex = NOTES.indexOf(concertRoot);
+  if (concertIndex < 0) return '';
+
+  // Bb trumpet transposes up a major second (+2)
+  const trumpetIndex = (concertIndex + 2) % 12;
+  const trumpetKey = NOTES[trumpetIndex];
+
+  const scaleLabel = isMinor ? 'natural minor' : 'major';
+
+  const intervals = isMinor
+    ? [0,2,3,5,7,8,10]   // natural minor
+    : [0,2,4,5,7,9,11]; // major
+
+  const scaleNotes = intervals
+    .map(i => {
+      const n = NOTES[(trumpetIndex + i) % 12];
+      return `<span class="scale-note" style="margin-right:6px;">${preferFlats(n)}</span>`;
+    })
+    .join('');
+
+  return `
+    <div class="meta-row"
+         style="margin-top:4px;font-size:13px;color:#777;font-style:italic;">
+      🎺 Trumpet scale (${preferFlats(trumpetKey)} ${scaleLabel}):
+      ${scaleNotes}
+    </div>
+  `;
+}
+
 let transposeSteps=0,songOriginalKey=null;
 
 /* ================== Nashville Numbers ================== */
@@ -1025,8 +1074,18 @@ function render(){
 
   const {header,body,hasExplicit}=splitHeaderBlock(raw);
   const metaFallback=parseMetaFields(raw);
-  const headerHtml=renderHeaderRaw(header,hasExplicit?null:metaFallback,sel);
-  const fullHeaderHtml = headerHtml + capoNoteHtml;
+ const headerHtml = renderHeaderRaw(header, hasExplicit ? null : metaFallback, sel);
+
+// Determine which key the trumpet should use
+const trumpetConcertKey =
+  (sel && sel.trim() !== '') ? sel.trim() : songOriginalKey;
+
+// Build trumpet annotation
+const trumpetNoteHtml = buildTrumpetAnnotation(trumpetConcertKey);
+
+// Combine header + annotations
+const fullHeaderHtml = headerHtml + capoNoteHtml + trumpetNoteHtml;
+
   const bodyT=applyTransposeToText(body,effectiveSteps);
     // 🎼 Nashville toggle (applies AFTER transpose/capo so it matches what musicians see)
   const showNash = document.getElementById('nashvilleToggle')?.checked;
